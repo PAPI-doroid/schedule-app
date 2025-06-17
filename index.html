@@ -5,123 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>スケジュールアプリ</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f9f9f9;
-    }
-    .wrapper {
-      display: grid;
-      grid-template-columns: 120px 1fr;
-      grid-template-rows: 40px 1fr;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .corner {
-      grid-row: 1 / 2;
-      grid-column: 1 / 2;
-      background: #fff;
-      padding: 10px;
-      font-weight: bold;
-      border-bottom: 1px solid #ccc;
-      border-right: 1px solid #ccc;
-      z-index: 2;
-    }
-    .header {
-      grid-row: 1 / 2;
-      grid-column: 2 / 3;
-      display: flex;
-      overflow-x: auto;
-      background: #fff;
-      border-bottom: 1px solid #ccc;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-    .header .cell {
-      min-width: 80px;
-      padding: 10px;
-      text-align: center;
-      border-right: 1px solid #eee;
-      flex-shrink: 0;
-    }
-    .row-labels {
-      grid-row: 2 / 3;
-      grid-column: 1 / 2;
-      overflow-y: auto;
-      background: #fff;
-      border-right: 1px solid #ccc;
-    }
-    .row-label {
-      height: 50px;
-      line-height: 50px;
-      padding-left: 8px;
-      border-bottom: 1px solid #eee;
-    }
-    .content {
-      grid-row: 2 / 3;
-      grid-column: 2 / 3;
-      overflow: auto;
-    }
-    .content-row {
-      display: flex;
-    }
-    .content-row .cell {
-      min-width: 80px;
-      height: 50px;
-      border-bottom: 1px solid #eee;
-      border-right: 1px solid #eee;
-      flex-shrink: 0;
-    }
-  </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="corner">現場名</div>
-    <div class="header" id="header"></div>
-    <div class="row-labels" id="row-labels"></div>
-    <div class="content" id="content"></div>
+  <div class="schedule-container">
+    <div class="header-corner">空き状況</div>
+    <div class="header-scroll">
+      <div id="date-row" class="row"></div>
+    </div>
+    <div class="body-fixed">
+      <div id="site-column"></div>
+    </div>
+    <div class="body-scroll">
+      <div id="grid-body"></div>
+    </div>
   </div>
-
-  <script>
-    const days = 31;
-    const sites = ["現場K1", "現場L1", "現場M1", "現場N1", "現場O1", "現場P1", "現場Q1", "現場R1", "現場S1", "現場T1", "現場U1"];
-
-    const header = document.getElementById("header");
-    const rowLabels = document.getElementById("row-labels");
-    const content = document.getElementById("content");
-
-    for (let d = 1; d <= days; d++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.textContent = `${d}日`;
-      header.appendChild(cell);
-    }
-
-    for (let site of sites) {
-      const label = document.createElement("div");
-      label.className = "row-label";
-      label.textContent = site;
-      rowLabels.appendChild(label);
-
-      const row = document.createElement("div");
-      row.className = "content-row";
-      for (let d = 1; d <= days; d++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        row.appendChild(cell);
-      }
-      content.appendChild(row);
-    }
-
-    content.addEventListener('scroll', () => {
-      rowLabels.scrollTop = content.scrollTop;
-    });
-  </script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
