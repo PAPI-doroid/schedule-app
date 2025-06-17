@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>スケジュールアプリ</title>
+  <title>社内スケジュール管理</title>
   <style>
     body {
-      font-family: sans-serif;
       margin: 0;
-      padding: 0;
+      font-family: sans-serif;
       overflow: hidden;
     }
     .container {
@@ -16,17 +15,12 @@
       flex-direction: column;
       height: 100vh;
     }
-    .header {
-      background: #f0f0f0;
-      border-bottom: 1px solid #ccc;
-    }
     .menu-bar {
+      display: flex;
+      align-items: center;
       background: #333;
       color: white;
       padding: 8px;
-      display: flex;
-      align-items: center;
-      position: relative;
     }
     .menu-button {
       cursor: pointer;
@@ -34,25 +28,35 @@
     }
     .menu-list {
       display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
+      flex-direction: column;
       background: #444;
       color: white;
       padding: 10px;
-      z-index: 10;
     }
     .menu-list a {
       color: white;
       text-decoration: none;
       padding: 5px 0;
-      display: block;
+      cursor: pointer;
     }
     .menu-list.show {
+      display: flex;
+    }
+
+    .header, .calendar-area {
+      display: none;
+    }
+    .header.active, .calendar-area.active, .content.active {
       display: block;
     }
-    .calendar-header, .location-select {
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f0f0f0;
       padding: 8px;
+      border-bottom: 1px solid #ccc;
     }
     .calendar-area {
       flex: 1;
@@ -89,77 +93,84 @@
     .saturday {
       color: blue;
     }
-    .content-area {
-      flex: 1;
-      overflow: auto;
+
+    .form-group {
+      margin: 12px 0;
+    }
+
+    .content {
       padding: 16px;
     }
-    .form-group {
-      margin-bottom: 10px;
+
+    input[type="text"], select, input[type="date"] {
+      padding: 6px;
+      font-size: 14px;
+      width: 200px;
     }
-    label {
-      display: block;
-      margin-bottom: 4px;
-    }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
+
+    button {
+      padding: 8px 12px;
+      margin-top: 12px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <div class="menu-bar">
-        <div class="menu-button" onclick="toggleMenu()">≡</div>
-        <div>スケジュールアプリ</div>
-        <div class="menu-list" id="menu">
-          <a href="#" onclick="showView('calendar')">スケジュール表示</a>
-          <a href="#" onclick="showView('siteRegister')">現場登録</a>
-          <a href="#">従業員・車両配置登録</a>
-          <a href="#">従業員情報登録</a>
-          <a href="#">車両情報登録</a>
-        </div>
+    <div class="menu-bar">
+      <div class="menu-button" onclick="toggleMenu()">≡</div>
+      <div id="view-title">スケジュール表示</div>
+    </div>
+    <div class="menu-list" id="menu">
+      <a onclick="switchView('schedule')">スケジュール表示</a>
+      <a onclick="switchView('site')">現場登録</a>
+      <a href="#">従業員・車両配置登録</a>
+      <a href="#">従業員情報登録</a>
+      <a href="#">車両情報登録</a>
+    </div>
+
+    <!-- スケジュール画面 -->
+    <div class="header active" id="calendar-header">
+      <div class="calendar-header">
+        <button onclick="changeMonth(-1)">前月</button>
+        <div id="current-month">2025年6月</div>
+        <button onclick="changeMonth(1)">翌月</button>
       </div>
-      <div id="calendarControls">
-        <div class="calendar-header">
-          <button onclick="changeMonth(-1)">前月</button>
-          <div id="current-month">2025年6月</div>
-          <button onclick="changeMonth(1)">翌月</button>
-        </div>
-        <div class="location-select">拠点：<select id="location">
+      <div style="padding: 0 8px;">拠点：
+        <select id="location">
           <option>本社</option>
           <option>横浜</option>
-        </select></div>
+        </select>
       </div>
     </div>
-    <div class="calendar-area" id="calendarView">
+    <div class="calendar-area active" id="calendar-area">
       <table id="calendar"></table>
     </div>
-    <div class="content-area" id="siteRegisterView" style="display: none;">
+
+    <!-- 現場登録画面 -->
+    <div class="content" id="site-form">
       <div class="form-group">
-        <label>現場名</label>
+        <label>現場名：</label>
         <input type="text" />
       </div>
       <div class="form-group">
-        <label>所属</label>
+        <label>所属：</label>
         <select>
           <option>本社</option>
           <option>横浜</option>
         </select>
       </div>
       <div class="form-group">
-        <label>工期（開始）</label>
+        <label>工期（開始）：</label>
         <input type="date" />
       </div>
       <div class="form-group">
-        <label>工期（終了）</label>
+        <label>工期（終了）：</label>
         <input type="date" />
       </div>
       <button>登録</button>
     </div>
   </div>
+
   <script>
     const calendar = document.getElementById("calendar");
     let currentYear = 2025;
@@ -167,6 +178,23 @@
 
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
+    }
+
+    function switchView(view) {
+      document.getElementById("menu").classList.remove("show");
+
+      document.getElementById("calendar-area").classList.remove("active");
+      document.getElementById("calendar-header").classList.remove("active");
+      document.getElementById("site-form").classList.remove("active");
+
+      if (view === "schedule") {
+        document.getElementById("calendar-area").classList.add("active");
+        document.getElementById("calendar-header").classList.add("active");
+        document.getElementById("view-title").innerText = "スケジュール表示";
+      } else if (view === "site") {
+        document.getElementById("site-form").classList.add("active");
+        document.getElementById("view-title").innerText = "現場登録";
+      }
     }
 
     function renderCalendar(year, month) {
@@ -203,12 +231,6 @@
         currentYear++;
       }
       renderCalendar(currentYear, currentMonth);
-    }
-
-    function showView(view) {
-      document.getElementById("calendarView").style.display = view === 'calendar' ? 'block' : 'none';
-      document.getElementById("siteRegisterView").style.display = view === 'siteRegister' ? 'block' : 'none';
-      document.getElementById("calendarControls").style.display = view === 'calendar' ? 'block' : 'none';
     }
 
     renderCalendar(currentYear, currentMonth);
