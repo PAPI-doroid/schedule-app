@@ -9,82 +9,109 @@
       margin: 0;
       font-family: sans-serif;
     }
-    .container {
+    .wrapper {
       display: flex;
+      flex-direction: column;
       height: 100vh;
+      overflow: hidden;
+    }
+    .top-row {
+      display: flex;
+    }
+    .corner-cell {
+      width: 100px;
+      height: 60px;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 3;
+      font-weight: bold;
+    }
+    .header-row {
+      display: flex;
+      overflow-x: auto;
+      background: #eee;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .date-cell {
+      min-width: 100px;
+      height: 60px;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+    .content {
+      display: flex;
+      flex: 1;
       overflow: hidden;
     }
     .left-col {
       width: 100px;
       flex-shrink: 0;
+      overflow-y: auto;
+      position: sticky;
+      left: 0;
+      z-index: 1;
       background: #f0f0f0;
-      display: flex;
-      flex-direction: column;
     }
-    .left-col .corner {
-      height: 60px;
-      border: 1px solid #ccc;
-      background: #ddd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-    }
-    .left-col .label {
+    .label-cell {
       height: 50px;
       border: 1px solid #ccc;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .main-table {
+    .scrollable-table {
       overflow: auto;
       flex: 1;
     }
-    .table-content {
-      display: flex;
-      flex-direction: column;
-      min-width: max-content;
-    }
-    .date-row {
+    .row {
       display: flex;
     }
-    .date-cell, .cell {
+    .cell {
       min-width: 100px;
       height: 50px;
       border: 1px solid #ccc;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    .date-cell {
-      height: 60px;
-      background: #eee;
-      font-weight: bold;
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="left-col">
-      <div class="corner">空き状況</div>
-      <div class="label">現場1</div>
-      <div class="label">現場2</div>
-      <div class="label">現場3</div>
-      <div class="label">現場4</div>
+  <div class="wrapper">
+    <div class="top-row">
+      <div class="corner-cell">空き状況</div>
+      <div class="header-row">
+        <div class="date-cell">1日(日)</div>
+        <div class="date-cell">2日(月)</div>
+        <div class="date-cell">3日(火)</div>
+        <div class="date-cell">4日(水)</div>
+        <div class="date-cell">5日(木)</div>
+        <div class="date-cell">6日(金)</div>
+        <div class="date-cell">7日(土)</div>
+      </div>
     </div>
-    <div class="main-table">
-      <div class="table-content">
-        <div class="date-row">
-          <div class="date-cell">1日(日)</div>
-          <div class="date-cell">2日(月)</div>
-          <div class="date-cell">3日(火)</div>
-          <div class="date-cell">4日(水)</div>
-          <div class="date-cell">5日(木)</div>
-          <div class="date-cell">6日(金)</div>
-          <div class="date-cell">7日(土)</div>
-        </div>
-        <div class="date-row">
+    <div class="content">
+      <div class="left-col">
+        <div class="label-cell">現場1</div>
+        <div class="label-cell">現場2</div>
+        <div class="label-cell">現場3</div>
+        <div class="label-cell">現場4</div>
+      </div>
+      <div class="scrollable-table">
+        <div class="row">
           <div class="cell"></div>
           <div class="cell"></div>
           <div class="cell"></div>
@@ -93,7 +120,7 @@
           <div class="cell"></div>
           <div class="cell"></div>
         </div>
-        <div class="date-row">
+        <div class="row">
           <div class="cell"></div>
           <div class="cell"></div>
           <div class="cell"></div>
@@ -102,7 +129,7 @@
           <div class="cell"></div>
           <div class="cell"></div>
         </div>
-        <div class="date-row">
+        <div class="row">
           <div class="cell"></div>
           <div class="cell"></div>
           <div class="cell"></div>
@@ -111,7 +138,7 @@
           <div class="cell"></div>
           <div class="cell"></div>
         </div>
-        <div class="date-row">
+        <div class="row">
           <div class="cell"></div>
           <div class="cell"></div>
           <div class="cell"></div>
