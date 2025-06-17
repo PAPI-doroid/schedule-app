@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>スケジュール表示</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: sans-serif;
       margin: 0;
@@ -108,11 +106,27 @@
       z-index: 3;
       background: #fff;
     }
-    .sunday {
-      color: red;
+    .sunday { color: red; }
+    .saturday { color: blue; }
+
+    /* === 現場登録画面 === */
+    .site-form {
+      padding: 20px;
+      display: none;
     }
-    .saturday {
-      color: blue;
+    .site-form label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .site-form input {
+      padding: 6px;
+      width: 100%;
+      max-width: 300px;
+    }
+    .site-form button {
+      margin-top: 20px;
+      padding: 8px 16px;
     }
   </style>
 </head>
@@ -145,8 +159,22 @@
       </div>
     </div>
 
-    <div class="calendar-area">
+    <div class="calendar-area" id="calendar-area">
       <table id="calendar"></table>
+    </div>
+
+    <div class="site-form" id="site-form">
+      <h2>現場登録</h2>
+      <label>現場名</label>
+      <input type="text" id="site-name" />
+
+      <label>工期（開始）</label>
+      <input type="date" id="start-date" />
+
+      <label>工期（終了）</label>
+      <input type="date" id="end-date" />
+
+      <button onclick="alert('保存されました（仮）')">保存</button>
     </div>
   </div>
 
@@ -162,6 +190,8 @@
     function switchView(view) {
       document.getElementById("menu").classList.remove("show");
       document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
+      document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
+      document.getElementById("site-form").style.display = view === 'site' ? 'block' : 'none';
     }
 
     function renderCalendar(year, month) {
