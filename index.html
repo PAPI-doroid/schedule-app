@@ -1,154 +1,102 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スケジュールカレンダー</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>スケジュール</title>
   <style>
     body {
       margin: 0;
       font-family: sans-serif;
     }
-    .wrapper {
-      display: flex;
-      flex-direction: column;
+    .container {
+      width: 100vw;
       height: 100vh;
       overflow: hidden;
+      position: relative;
     }
-    .top-row {
-      display: flex;
-    }
-    .corner-cell {
-      width: 100px;
-      height: 60px;
-      background: #ddd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid #ccc;
-      position: sticky;
+    .grid {
+      position: absolute;
       top: 0;
       left: 0;
-      z-index: 3;
-      font-weight: bold;
+      overflow: scroll;
+      width: 100%;
+      height: 100%;
     }
-    .header-row {
-      display: flex;
-      overflow-x: auto;
-      background: #eee;
+    table {
+      border-collapse: collapse;
+      min-width: 100%;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: center;
+      min-width: 80px;
+      min-height: 40px;
+      background: white;
+    }
+    .fixed-header {
       position: sticky;
       top: 0;
+      background: #f0f0f0;
       z-index: 2;
     }
-    .date-cell {
-      min-width: 100px;
-      height: 60px;
-      border: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      flex-shrink: 0;
-    }
-    .content {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
-    .left-col {
-      width: 100px;
-      flex-shrink: 0;
-      overflow-y: auto;
+    .fixed-left {
       position: sticky;
       left: 0;
-      z-index: 1;
       background: #f0f0f0;
+      z-index: 1;
     }
-    .label-cell {
-      height: 50px;
-      border: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .scrollable-table {
-      overflow: auto;
-      flex: 1;
-    }
-    .row {
-      display: flex;
-    }
-    .cell {
-      min-width: 100px;
-      height: 50px;
-      border: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+    .corner {
+      z-index: 3;
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <div class="top-row">
-      <div class="corner-cell">空き状況</div>
-      <div class="header-row">
-        <div class="date-cell">1日(日)</div>
-        <div class="date-cell">2日(月)</div>
-        <div class="date-cell">3日(火)</div>
-        <div class="date-cell">4日(水)</div>
-        <div class="date-cell">5日(木)</div>
-        <div class="date-cell">6日(金)</div>
-        <div class="date-cell">7日(土)</div>
-      </div>
-    </div>
-    <div class="content">
-      <div class="left-col">
-        <div class="label-cell">現場1</div>
-        <div class="label-cell">現場2</div>
-        <div class="label-cell">現場3</div>
-        <div class="label-cell">現場4</div>
-      </div>
-      <div class="scrollable-table">
-        <div class="row">
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-        </div>
-        <div class="row">
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-        </div>
-        <div class="row">
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-        </div>
-        <div class="row">
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-          <div class="cell"></div>
-        </div>
-      </div>
+  <div class="container">
+    <div class="grid">
+      <table>
+        <thead>
+          <tr>
+            <th class="fixed-header fixed-left corner">空き状況</th>
+            <!-- 日付ヘッダー -->
+            <!-- JavaScriptで自動生成 -->
+          </tr>
+        </thead>
+        <tbody id="schedule-body">
+          <!-- 内容をJavaScriptで自動生成 -->
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <script>
+    const days = 30;
+    const sites = ["空き状況", "現場1", "現場2", "現場3", "現場4", "現場5"];
+
+    // 日付ヘッダー生成
+    const headerRow = document.querySelector("thead tr");
+    for (let i = 1; i <= days; i++) {
+      const th = document.createElement("th");
+      th.className = "fixed-header";
+      th.textContent = `${i}日`;
+      headerRow.appendChild(th);
+    }
+
+    // 表本体生成
+    const tbody = document.getElementById("schedule-body");
+    for (let i = 0; i < sites.length; i++) {
+      const tr = document.createElement("tr");
+      for (let j = 0; j <= days; j++) {
+        const cell = document.createElement("td");
+        if (j === 0) {
+          cell.textContent = sites[i];
+          cell.className = "fixed-left";
+        }
+        tr.appendChild(cell);
+      }
+      tbody.appendChild(tr);
+    }
+  </script>
 </body>
 </html>
