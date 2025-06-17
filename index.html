@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>スケジュール表示</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: sans-serif;
       margin: 0;
@@ -17,10 +20,10 @@
       height: 100vh;
     }
     .header {
-      display: flex;
-      flex-direction: column;
       background: #f0f0f0;
       border-bottom: 1px solid #ccc;
+      position: relative;
+      z-index: 10;
     }
     .menu-bar {
       background: #333;
@@ -29,11 +32,12 @@
       display: flex;
       align-items: center;
       position: relative;
-      z-index: 10;
     }
     .menu-button {
       cursor: pointer;
       margin-right: 10px;
+      font-size: 24px;
+      user-select: none;
     }
     .menu-list {
       display: none;
@@ -45,15 +49,15 @@
       padding: 10px;
       flex-direction: column;
       width: 200px;
-      z-index: 20;
+      z-index: 999;
+    }
+    .menu-list.show {
+      display: flex;
     }
     .menu-list a {
       color: white;
       text-decoration: none;
-      padding: 5px 0;
-    }
-    .menu-list.show {
-      display: flex;
+      padding: 8px 0;
     }
     .calendar-header {
       display: flex;
@@ -61,6 +65,13 @@
       align-items: center;
       padding: 8px;
       gap: 10px;
+    }
+    .calendar-header button {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    .location-selector {
+      padding: 0 8px 8px 8px;
     }
     .calendar-area {
       flex: 1;
@@ -76,6 +87,7 @@
       width: 100px;
       height: 40px;
       text-align: center;
+      background: white;
     }
     th.sticky-top {
       position: sticky;
@@ -90,17 +102,17 @@
       z-index: 1;
     }
     th.sticky-corner {
+      position: sticky;
+      top: 0;
+      left: 0;
       z-index: 3;
+      background: #fff;
     }
     .sunday {
       color: red;
     }
     .saturday {
       color: blue;
-    }
-    .location-selector {
-      padding: 0 8px;
-      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -132,6 +144,7 @@
         </div>
       </div>
     </div>
+
     <div class="calendar-area">
       <table id="calendar"></table>
     </div>
@@ -153,7 +166,7 @@
 
     function renderCalendar(year, month) {
       const daysInMonth = new Date(year, month, 0).getDate();
-      const firstRow = [`<th class="sticky-top sticky-left sticky-corner"></th>`];
+      const firstRow = [`<th class="sticky-corner"></th>`];
       const secondRow = [`<td class="sticky-left">空き状況</td>`];
 
       for (let d = 1; d <= daysInMonth; d++) {
