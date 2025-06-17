@@ -2,104 +2,86 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>スケジュール表示</title>
   <style>
     body {
       font-family: sans-serif;
       margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
-    header {
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    .header {
+      display: flex;
+      flex-direction: column;
+      background: #f0f0f0;
+      border-bottom: 1px solid #ccc;
+    }
+    .menu-bar {
+      background: #333;
+      color: white;
+      padding: 8px;
       display: flex;
       align-items: center;
-      background-color: #333;
-      color: #fff;
-      padding: 10px;
-      position: relative;
     }
-    #menuToggle {
-      font-size: 24px;
+    .menu-button {
       cursor: pointer;
       margin-right: 10px;
     }
-    #menu {
-      position: absolute;
-      top: 50px;
-      left: 10px;
-      background: #fff;
-      border: 1px solid #ccc;
-      padding: 10px;
+    .menu-list {
       display: none;
-      z-index: 1000;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      flex-direction: column;
+      background: #444;
+      color: white;
+      padding: 10px;
     }
-    #menu button {
-      display: block;
-      width: 200px;
-      text-align: left;
-      margin: 4px 0;
-      padding: 6px;
+    .menu-list a {
+      color: white;
+      text-decoration: none;
+      padding: 5px 0;
     }
-    .title {
-      font-size: 20px;
-      flex-grow: 1;
-    }
-    .month {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .base-select {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .scroll-container {
+    .menu-list.show {
       display: flex;
-      height: 70vh;
-      overflow: hidden;
-      position: relative;
     }
-    .fixed-column {
-      flex: 0 0 100px;
-      background: #f0f0f0;
-      overflow-y: scroll;
-      z-index: 2;
-    }
-    .fixed-column .cell {
-      height: 40px;
+    .calendar-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid #ccc;
-      border-right: 1px solid #ccc;
-      white-space: nowrap;
+      padding: 8px;
     }
-    .table-scroll {
-      overflow: scroll;
-      flex-grow: 1;
+    .calendar-area {
+      flex: 1;
+      overflow: auto;
     }
     table {
       border-collapse: collapse;
+      width: max-content;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 6px;
-      text-align: center;
-      min-width: 80px;
+      width: 100px;
       height: 40px;
+      text-align: center;
     }
-    th.sticky {
+    th.sticky-top {
       position: sticky;
       top: 0;
       background: #fff;
-      z-index: 1;
+      z-index: 2;
     }
-    .fixed-cell {
+    td.sticky-left {
       position: sticky;
       left: 0;
-      background: #f0f0f0;
-      z-index: 2;
+      background: #fff;
+      z-index: 1;
+    }
+    th.sticky-corner {
+      z-index: 3;
     }
     .sunday {
       color: red;
@@ -110,109 +92,80 @@
   </style>
 </head>
 <body>
-  <header>
-    <div id="menuToggle">☰</div>
-    <div class="title">スケジュール表示</div>
-  </header>
-  <div id="menu">
-    <button onclick="alert('スケジュール表示')">スケジュール表示</button>
-    <button onclick="alert('現場登録')">現場登録</button>
-    <button onclick="alert('従業員・車両配置登録')">従業員・車両配置登録</button>
-    <button onclick="alert('従業員情報登録')">従業員情報登録</button>
-    <button onclick="alert('車両情報登録')">車両情報登録</button>
-  </div>
-  <div class="month" id="monthLabel"></div>
-  <div class="base-select">
-    <select id="locationSelect" onchange="renderTable()">
-      <option>本社</option>
-      <option>横浜</option>
-    </select>
-  </div>
-  <div class="scroll-container">
-    <div class="fixed-column" id="leftColumn">
-      <div class="cell"></div>
-      <div class="cell">空き状況</div>
-      <!-- 現場名追加 -->
+  <div class="container">
+    <div class="header">
+      <div class="menu-bar">
+        <div class="menu-button" onclick="toggleMenu()">≡</div>
+        <div>スケジュールアプリ</div>
+      </div>
+      <div class="menu-list" id="menu">
+        <a href="#">スケジュール表示</a>
+        <a href="#">現場登録</a>
+        <a href="#">従業員・車両配置登録</a>
+        <a href="#">従業員情報登録</a>
+        <a href="#">車両情報登録</a>
+      </div>
+      <div class="calendar-header">
+        <button onclick="changeMonth(-1)">前月</button>
+        <div id="current-month">2025年6月</div>
+        <button onclick="changeMonth(1)">翌月</button>
+      </div>
+      <div style="padding: 0 8px;">拠点：<select id="location">
+        <option>本社</option>
+        <option>横浜</option>
+      </select></div>
     </div>
-    <div class="table-scroll" id="tableScroll">
-      <table id="scheduleTable">
-        <!-- 日付とデータが入る -->
-      </table>
+    <div class="calendar-area">
+      <table id="calendar"></table>
     </div>
   </div>
 
   <script>
-    const menuToggle = document.getElementById("menuToggle");
-    const menu = document.getElementById("menu");
-    menuToggle.onclick = () => {
-      menu.style.display = menu.style.display === "block" ? "none" : "block";
-    };
+    const calendar = document.getElementById("calendar");
+    let currentYear = 2025;
+    let currentMonth = 6;
 
-    const now = new Date();
-    let currentYear = now.getFullYear();
-    let currentMonth = now.getMonth() + 1;
+    function toggleMenu() {
+      document.getElementById("menu").classList.toggle("show");
+    }
 
-    const monthLabel = document.getElementById("monthLabel");
+    function renderCalendar(year, month) {
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const firstRow = [`<th class="sticky-top sticky-left sticky-corner"></th>`];
+      const secondRow = [`<td class="sticky-left">空き状況</td>`];
 
-    function renderTable() {
-      const table = document.getElementById("scheduleTable");
-      const leftCol = document.getElementById("leftColumn");
-
-      table.innerHTML = "";
-      leftCol.innerHTML = '<div class="cell"></div><div class="cell">空き状況</div>';
-
-      monthLabel.innerHTML = `
-        <button onclick="changeMonth(-1)">＜</button>
-        ${currentYear}年${currentMonth}月
-        <button onclick="changeMonth(1)">＞</button>
-      `;
-
-      const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-      const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-
-      const headerRow = document.createElement("tr");
       for (let d = 1; d <= daysInMonth; d++) {
-        const date = new Date(currentYear, currentMonth - 1, d);
-        const day = weekdays[date.getDay()];
-        const th = document.createElement("th");
-        th.className = "sticky";
-        if (day === "日") th.classList.add("sunday");
-        if (day === "土") th.classList.add("saturday");
-        th.innerHTML = `${currentMonth}/${d}<br>(${day})`;
-        headerRow.appendChild(th);
+        const date = new Date(year, month - 1, d);
+        const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
+        const className = date.getDay() === 0 ? "sunday" : date.getDay() === 6 ? "saturday" : "";
+        firstRow.push(`<th class="sticky-top ${className}">${month}/${d}<br>(${weekday})</th>`);
+        secondRow.push(`<td></td>`);
       }
-      table.appendChild(headerRow);
 
-      const rows = 20;
-      for (let r = 1; r <= rows; r++) {
-        const tr = document.createElement("tr");
-        for (let d = 1; d <= daysInMonth; d++) {
-          const td = document.createElement("td");
-          td.textContent = "";
-          tr.appendChild(td);
-        }
-        table.appendChild(tr);
-
-        const siteCell = document.createElement("div");
-        siteCell.className = "cell";
-        siteCell.textContent = `現場${r}`;
-        leftCol.appendChild(siteCell);
+      let rows = ["<tr>" + firstRow.join("") + "</tr>", "<tr>" + secondRow.join("") + "</tr>"];
+      for (let i = 1; i <= 30; i++) {
+        let row = [`<td class="sticky-left">現場${i}</td>`];
+        for (let d = 1; d <= daysInMonth; d++) row.push("<td></td>");
+        rows.push("<tr>" + row.join("") + "</tr>");
       }
+
+      calendar.innerHTML = rows.join("");
+      document.getElementById("current-month").textContent = `${year}年${month}月`;
     }
 
     function changeMonth(offset) {
       currentMonth += offset;
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
-      } else if (currentMonth < 1) {
+      if (currentMonth < 1) {
         currentMonth = 12;
         currentYear--;
+      } else if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
       }
-      renderTable();
+      renderCalendar(currentYear, currentMonth);
     }
 
-    renderTable();
+    renderCalendar(currentYear, currentMonth);
   </script>
 </body>
 </html>
