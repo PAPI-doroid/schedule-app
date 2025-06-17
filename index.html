@@ -82,10 +82,11 @@
   </div>
 
   <script>
-    const sites = ["空き状況", "現場1", "現場2", "現場3", "現場4", "現場5"];
+    const sites = ["現場1", "現場2", "現場3", "現場4", "現場5"];
     let currentYear = 2025;
     let currentMonth = 6;
 
+    const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
     const monthLabel = document.getElementById("monthLabel");
     const dateRow = document.getElementById("dateRow");
     const tbody = document.getElementById("schedule-body");
@@ -94,33 +95,44 @@
       const days = new Date(currentYear, currentMonth, 0).getDate();
       monthLabel.textContent = `${currentYear}年${currentMonth}月`;
 
-      // 曜日取得用
-      const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-
-      // ヘッダー再描画
+      // 日付行（1行目）
       dateRow.innerHTML = '<th class="fixed-header fixed-left corner"></th>';
       for (let i = 1; i <= days; i++) {
         const date = new Date(currentYear, currentMonth - 1, i);
         const day = weekdays[date.getDay()];
         const th = document.createElement("th");
         th.className = "fixed-header";
-        th.innerHTML = `<div>${i}(${day})</div>`;
+        th.innerHTML = `${i}(${day})`;
         if (day === "土") th.style.color = "blue";
         if (day === "日") th.style.color = "red";
         dateRow.appendChild(th);
       }
 
-      // ボディ再描画
+      // 「空き状況」行（2行目）
+      const rowEmpty = document.createElement("tr");
+      const cellSiteLabel = document.createElement("td");
+      cellSiteLabel.className = "fixed-left";
+      cellSiteLabel.textContent = "空き状況";
+      rowEmpty.appendChild(cellSiteLabel);
+      for (let i = 1; i <= days; i++) {
+        const td = document.createElement("td");
+        td.textContent = "";
+        rowEmpty.appendChild(td);
+      }
       tbody.innerHTML = "";
+      tbody.appendChild(rowEmpty);
+
+      // 現場行
       for (let i = 0; i < sites.length; i++) {
         const tr = document.createElement("tr");
-        for (let j = 0; j <= days; j++) {
-          const cell = document.createElement("td");
-          if (j === 0) {
-            cell.textContent = i === 0 ? "" : sites[i];
-            cell.className = "fixed-left";
-          }
-          tr.appendChild(cell);
+        const tdLeft = document.createElement("td");
+        tdLeft.className = "fixed-left";
+        tdLeft.textContent = sites[i];
+        tr.appendChild(tdLeft);
+        for (let j = 1; j <= days; j++) {
+          const td = document.createElement("td");
+          td.textContent = "";
+          tr.appendChild(td);
         }
         tbody.appendChild(tr);
       }
