@@ -33,6 +33,9 @@
       cursor: pointer;
       margin-right: 10px;
     }
+    .menu-title {
+      font-weight: bold;
+    }
     .menu-list {
       display: none;
       flex-direction: column;
@@ -44,6 +47,7 @@
       color: white;
       text-decoration: none;
       padding: 5px 0;
+      cursor: pointer;
     }
     .menu-list.show {
       display: flex;
@@ -67,6 +71,7 @@
       width: 100px;
       height: 40px;
       text-align: center;
+      background: #fff;
     }
     th.sticky-top {
       position: sticky;
@@ -81,6 +86,10 @@
       z-index: 1;
     }
     th.sticky-corner {
+      position: sticky;
+      top: 0;
+      left: 0;
+      background: #fff;
       z-index: 3;
     }
     .sunday {
@@ -96,10 +105,10 @@
     <div class="header">
       <div class="menu-bar">
         <div class="menu-button" onclick="toggleMenu()">≡</div>
-        <div>スケジュールアプリ</div>
+        <div class="menu-title">スケジュール表示</div>
       </div>
       <div class="menu-list" id="menu">
-        <a href="#">スケジュール表示</a>
+        <a onclick="reloadSchedule()">スケジュール表示</a>
         <a href="#">現場登録</a>
         <a href="#">従業員・車両配置登録</a>
         <a href="#">従業員情報登録</a>
@@ -110,10 +119,13 @@
         <div id="current-month">2025年6月</div>
         <button onclick="changeMonth(1)">翌月</button>
       </div>
-      <div style="padding: 0 8px;">拠点：<select id="location">
-        <option>本社</option>
-        <option>横浜</option>
-      </select></div>
+      <div style="padding: 0 8px;">
+        拠点：
+        <select id="location">
+          <option>本社</option>
+          <option>横浜</option>
+        </select>
+      </div>
     </div>
     <div class="calendar-area">
       <table id="calendar"></table>
@@ -129,9 +141,14 @@
       document.getElementById("menu").classList.toggle("show");
     }
 
+    function reloadSchedule() {
+      renderCalendar(currentYear, currentMonth);
+      document.getElementById("menu").classList.remove("show");
+    }
+
     function renderCalendar(year, month) {
       const daysInMonth = new Date(year, month, 0).getDate();
-      const firstRow = [`<th class="sticky-top sticky-left sticky-corner"></th>`];
+      const firstRow = [`<th class="sticky-corner"></th>`];
       const secondRow = [`<td class="sticky-left">空き状況</td>`];
 
       for (let d = 1; d <= daysInMonth; d++) {
