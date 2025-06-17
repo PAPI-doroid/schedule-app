@@ -11,12 +11,21 @@
     }
     .header {
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 16px;
-      padding: 12px;
+      justify-content: space-between;
       background: #f0f0f0;
+      padding: 8px 12px;
       font-weight: bold;
+    }
+    .menu-button {
+      font-size: 24px;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+    .header-title {
+      flex: 1;
+      text-align: center;
     }
     .container {
       width: 100vw;
@@ -59,13 +68,59 @@
     .corner {
       z-index: 3;
     }
+
+    /* メニュー */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 220px;
+      height: 100%;
+      background: white;
+      border-right: 1px solid #ccc;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 10;
+      padding-top: 60px;
+    }
+    .side-menu.open {
+      transform: translateX(0);
+    }
+    .side-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .side-menu li {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    .side-menu li:hover {
+      background: #f5f5f5;
+    }
+
   </style>
 </head>
 <body>
   <div class="header">
-    <button onclick="changeMonth(-1)">前月</button>
-    <div id="monthLabel">2025年6月</div>
-    <button onclick="changeMonth(1)">翌月</button>
+    <button class="menu-button" onclick="toggleMenu()">≡</button>
+    <div class="header-title">
+      <button onclick="changeMonth(-1)">前月</button>
+      <span id="monthLabel">2025年6月</span>
+      <button onclick="changeMonth(1)">翌月</button>
+    </div>
+  </div>
+
+  <!-- サイドメニュー -->
+  <div id="sideMenu" class="side-menu">
+    <ul>
+      <li>スケジュール表示</li>
+      <li>従業員・車両配置登録</li>
+      <li>従業員情報登録</li>
+      <li>車両情報登録</li>
+    </ul>
   </div>
 
   <div class="container">
@@ -95,7 +150,6 @@
       const days = new Date(currentYear, currentMonth, 0).getDate();
       monthLabel.textContent = `${currentYear}年${currentMonth}月`;
 
-      // 日付行（1行目）
       dateRow.innerHTML = '<th class="fixed-header fixed-left corner"></th>';
       for (let i = 1; i <= days; i++) {
         const date = new Date(currentYear, currentMonth - 1, i);
@@ -108,7 +162,6 @@
         dateRow.appendChild(th);
       }
 
-      // 「空き状況」行（2行目）
       const rowEmpty = document.createElement("tr");
       const cellSiteLabel = document.createElement("td");
       cellSiteLabel.className = "fixed-left";
@@ -122,7 +175,6 @@
       tbody.innerHTML = "";
       tbody.appendChild(rowEmpty);
 
-      // 現場行
       for (let i = 0; i < sites.length; i++) {
         const tr = document.createElement("tr");
         const tdLeft = document.createElement("td");
@@ -148,6 +200,11 @@
         currentYear--;
       }
       render();
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById("sideMenu");
+      menu.classList.toggle("open");
     }
 
     render();
