@@ -9,9 +9,18 @@
       margin: 0;
       font-family: sans-serif;
     }
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      padding: 12px;
+      background: #f0f0f0;
+      font-weight: bold;
+    }
     .container {
       width: 100vw;
-      height: 100vh;
+      height: calc(100vh - 50px);
       overflow: hidden;
       position: relative;
     }
@@ -53,50 +62,83 @@
   </style>
 </head>
 <body>
+  <div class="header">
+    <button onclick="changeMonth(-1)">前月</button>
+    <div id="monthLabel">2025年6月</div>
+    <button onclick="changeMonth(1)">翌月</button>
+  </div>
+
   <div class="container">
     <div class="grid">
       <table>
         <thead>
-          <tr>
-            <th class="fixed-header fixed-left corner">空き状況</th>
-            <!-- 日付ヘッダー -->
-            <!-- JavaScriptで自動生成 -->
+          <tr id="dateRow">
+            <th class="fixed-header fixed-left corner"></th>
           </tr>
         </thead>
-        <tbody id="schedule-body">
-          <!-- 内容をJavaScriptで自動生成 -->
-        </tbody>
+        <tbody id="schedule-body"></tbody>
       </table>
     </div>
   </div>
 
   <script>
-    const days = 30;
     const sites = ["空き状況", "現場1", "現場2", "現場3", "現場4", "現場5"];
+    let currentYear = 2025;
+    let currentMonth = 6;
 
-    // 日付ヘッダー生成
-    const headerRow = document.querySelector("thead tr");
-    for (let i = 1; i <= days; i++) {
-      const th = document.createElement("th");
-      th.className = "fixed-header";
-      th.textContent = `${i}日`;
-      headerRow.appendChild(th);
-    }
-
-    // 表本体生成
+    const monthLabel = document.getElementById("monthLabel");
+    const dateRow = document.getElementById("dateRow");
     const tbody = document.getElementById("schedule-body");
-    for (let i = 0; i < sites.length; i++) {
-      const tr = document.createElement("tr");
-      for (let j = 0; j <= days; j++) {
-        const cell = document.createElement("td");
-        if (j === 0) {
-          cell.textContent = sites[i];
-          cell.className = "fixed-left";
-        }
-        tr.appendChild(cell);
+
+    function render() {
+      const days = new Date(currentYear, currentMonth, 0).getDate();
+      monthLabel.textContent = `${currentYear}年${currentMonth}月`;
+
+      // 曜日取得用
+      const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+
+      // ヘッダー再描画
+      dateRow.innerHTML = '<th class="fixed-header fixed-left corner"></th>';
+      for (let i = 1; i <= days; i++) {
+        const date = new Date(currentYear, currentMonth - 1, i);
+        const day = weekdays[date.getDay()];
+        const th = document.createElement("th");
+        th.className = "fixed-header";
+        th.innerHTML = `<div>${i}(${day})</div>`;
+        if (day === "土") th.style.color = "blue";
+        if (day === "日") th.style.color = "red";
+        dateRow.appendChild(th);
       }
-      tbody.appendChild(tr);
+
+      // ボディ再描画
+      tbody.innerHTML = "";
+      for (let i = 0; i < sites.length; i++) {
+        const tr = document.createElement("tr");
+        for (let j = 0; j <= days; j++) {
+          const cell = document.createElement("td");
+          if (j === 0) {
+            cell.textContent = i === 0 ? "" : sites[i];
+            cell.className = "fixed-left";
+          }
+          tr.appendChild(cell);
+        }
+        tbody.appendChild(tr);
+      }
     }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth > 12) {
+        currentMonth = 1;
+        currentYear++;
+      } else if (currentMonth < 1) {
+        currentMonth = 12;
+        currentYear--;
+      }
+      render();
+    }
+
+    render();
   </script>
 </body>
 </html>
