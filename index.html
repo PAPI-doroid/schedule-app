@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>社内スケジュール管理</title>
+  <title>スケジュールアプリ</title>
   <style>
     body {
-      margin: 0;
       font-family: sans-serif;
+      margin: 0;
+      padding: 0;
       overflow: hidden;
     }
     .container {
@@ -15,12 +16,18 @@
       flex-direction: column;
       height: 100vh;
     }
-    .menu-bar {
+    .header {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      background: #f0f0f0;
+      border-bottom: 1px solid #ccc;
+    }
+    .menu-bar {
       background: #333;
       color: white;
       padding: 8px;
+      display: flex;
+      align-items: center;
     }
     .menu-button {
       cursor: pointer;
@@ -32,31 +39,24 @@
       background: #444;
       color: white;
       padding: 10px;
+      position: absolute;
+      top: 40px;
+      left: 0;
+      z-index: 10;
     }
     .menu-list a {
       color: white;
       text-decoration: none;
       padding: 5px 0;
-      cursor: pointer;
     }
     .menu-list.show {
       display: flex;
     }
-
-    .header, .calendar-area {
-      display: none;
-    }
-    .header.active, .calendar-area.active, .content.active {
-      display: block;
-    }
-
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #f0f0f0;
       padding: 8px;
-      border-bottom: 1px solid #ccc;
     }
     .calendar-area {
       flex: 1;
@@ -93,87 +93,78 @@
     .saturday {
       color: blue;
     }
-
-    .form-group {
-      margin: 12px 0;
-    }
-
     .content {
-      padding: 16px;
+      display: none;
+      padding: 10px;
+      overflow-y: auto;
+      height: 100%;
     }
-
-    input[type="text"], select, input[type="date"] {
-      padding: 6px;
-      font-size: 14px;
-      width: 200px;
+    .content.active {
+      display: block;
     }
-
-    button {
-      padding: 8px 12px;
-      margin-top: 12px;
+    form input, form select {
+      margin: 5px 0;
+      width: 100%;
+      padding: 5px;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="menu-bar">
-      <div class="menu-button" onclick="toggleMenu()">≡</div>
-      <div id="view-title">スケジュール表示</div>
-    </div>
-    <div class="menu-list" id="menu">
-      <a onclick="switchView('schedule')">スケジュール表示</a>
-      <a onclick="switchView('site')">現場登録</a>
-      <a href="#">従業員・車両配置登録</a>
-      <a href="#">従業員情報登録</a>
-      <a href="#">車両情報登録</a>
-    </div>
-
-    <!-- スケジュール画面 -->
-    <div class="header active" id="calendar-header">
-      <div class="calendar-header">
-        <button onclick="changeMonth(-1)">前月</button>
-        <div id="current-month">2025年6月</div>
-        <button onclick="changeMonth(1)">翌月</button>
+    <div class="header">
+      <div class="menu-bar">
+        <div class="menu-button" onclick="toggleMenu()">≡</div>
+        <div>スケジュールアプリ</div>
       </div>
-      <div style="padding: 0 8px;">拠点：
-        <select id="location">
+      <div class="menu-list" id="menu">
+        <a href="#" onclick="showPage('calendar')">スケジュール表示</a>
+        <a href="#" onclick="showPage('site-form')">現場登録</a>
+        <a href="#">従業員・車両配置登録</a>
+        <a href="#">従業員情報登録</a>
+        <a href="#">車両情報登録</a>
+      </div>
+      <div id="calendar-header">
+        <div class="calendar-header">
+          <button onclick="changeMonth(-1)">前月</button>
+          <div id="current-month">2025年6月</div>
+          <button onclick="changeMonth(1)">翌月</button>
+        </div>
+        <div style="padding: 0 8px;">拠点：<select id="location">
           <option>本社</option>
           <option>横浜</option>
-        </select>
+        </select></div>
       </div>
-    </div>
-    <div class="calendar-area active" id="calendar-area">
-      <table id="calendar"></table>
     </div>
 
-   <!-- 現場登録画面 -->
-<!-- この「active」を消す！！ -->
-<div class="content" id="site-form">
-      <div class="form-group">
-        <label>現場名：</label>
-        <input type="text" />
-      </div>
-      <div class="form-group">
-        <label>所属：</label>
+    <!-- スケジュール表示 -->
+    <div class="calendar-area content active" id="calendar">
+      <table id="calendar-table"></table>
+    </div>
+
+    <!-- 現場登録画面 -->
+    <div class="content" id="site-form">
+      <h2>現場登録</h2>
+      <form>
+        <label>現場名:</label>
+        <input type="text" placeholder="現場名" />
+        <label>所属:</label>
         <select>
           <option>本社</option>
           <option>横浜</option>
         </select>
-      </div>
-      <div class="form-group">
-        <label>工期（開始）：</label>
+        <label>工期（開始）:</label>
         <input type="date" />
-      </div>
-      <div class="form-group">
-        <label>工期（終了）：</label>
+        <label>工期（終了）:</label>
         <input type="date" />
-      </div>
-      <button>登録</button>
+        <button type="submit">登録</button>
+      </form>
     </div>
   </div>
 
   <script>
-    const calendar = document.getElementById("calendar");
+    const calendarTable = document.getElementById("calendar-table");
+    const calendarDiv = document.getElementById("calendar");
     let currentYear = 2025;
     let currentMonth = 6;
 
@@ -181,21 +172,12 @@
       document.getElementById("menu").classList.toggle("show");
     }
 
-    function switchView(view) {
+    function showPage(id) {
+      document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
       document.getElementById("menu").classList.remove("show");
-
-      document.getElementById("calendar-area").classList.remove("active");
-      document.getElementById("calendar-header").classList.remove("active");
-      document.getElementById("site-form").classList.remove("active");
-
-      if (view === "schedule") {
-        document.getElementById("calendar-area").classList.add("active");
-        document.getElementById("calendar-header").classList.add("active");
-        document.getElementById("view-title").innerText = "スケジュール表示";
-      } else if (view === "site") {
-        document.getElementById("site-form").classList.add("active");
-        document.getElementById("view-title").innerText = "現場登録";
-      }
+      // 月と拠点の表示切り替え
+      document.getElementById("calendar-header").style.display = (id === 'calendar') ? 'block' : 'none';
     }
 
     function renderCalendar(year, month) {
@@ -218,7 +200,7 @@
         rows.push("<tr>" + row.join("") + "</tr>");
       }
 
-      calendar.innerHTML = rows.join("");
+      calendarTable.innerHTML = rows.join("");
       document.getElementById("current-month").textContent = `${year}年${month}月`;
     }
 
