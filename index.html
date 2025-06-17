@@ -6,25 +6,25 @@
   <title>スケジュール表示</title>
   <style>
     body {
-      font-family: sans-serif;
       margin: 0;
+      font-family: sans-serif;
       background: #f9f9f9;
     }
+
     .top-bar {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      background-color: #333;
-      color: white;
+      align-items: center;
       padding: 10px;
+      background: #333;
+      color: white;
     }
+
     .menu-icon {
       font-size: 24px;
       cursor: pointer;
     }
-    .page-title {
-      font-size: 16px;
-    }
+
     .menu-drawer {
       position: absolute;
       top: 0;
@@ -37,8 +37,9 @@
       display: none;
       flex-direction: column;
       gap: 10px;
-      z-index: 999;
+      z-index: 1000;
     }
+
     .menu-drawer button {
       background: none;
       border: none;
@@ -47,54 +48,55 @@
       text-align: left;
       cursor: pointer;
     }
-    .month-bar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin: 20px 0 10px;
-    }
-    #branchRow {
+
+    .month-bar, .branch-bar {
       text-align: center;
-      margin-bottom: 10px;
+      margin-top: 10px;
     }
-    .calendar-container {
+
+    .calendar-wrapper {
       overflow: auto;
-      white-space: nowrap;
+      max-width: 100%;
     }
-    table {
+
+    .calendar {
       border-collapse: collapse;
-      margin: 0 auto;
+      margin: 20px auto;
+      min-width: 800px;
     }
+
     th, td {
       border: 1px solid #ccc;
       padding: 8px;
       min-width: 80px;
       text-align: center;
     }
+
     th {
-      background: #fff;
       position: sticky;
       top: 0;
+      background: white;
       z-index: 2;
     }
-    .site-name {
+
+    .fixed-col {
       position: sticky;
       left: 0;
-      background: #fff;
+      background: white;
       z-index: 1;
       font-weight: bold;
     }
+
     .sunday {
       color: red;
     }
+
     .saturday {
       color: blue;
     }
   </style>
 </head>
 <body>
-
   <div class="top-bar">
     <div class="menu-icon" onclick="toggleMenu()">≡</div>
     <div class="page-title" id="pageTitle">スケジュール表示</div>
@@ -111,22 +113,24 @@
 
   <div class="month-bar">
     <button onclick="changeMonth(-1)">前月</button>
-    <div id="monthLabel">2025年6月</div>
+    <span id="monthLabel">2025年6月</span>
     <button onclick="changeMonth(1)">翌月</button>
   </div>
 
-  <div id="branchRow">
-    <label for="branchSelect">拠点：</label>
-    <select id="branchSelect" onchange="changeBranch()">
+  <div class="branch-bar">
+    拠点：
+    <select id="branchSelect" onchange="renderTable()">
       <option value="本社">本社</option>
       <option value="横浜">横浜</option>
     </select>
   </div>
 
-  <div class="calendar-container" id="calendarContainer"></div>
+  <div class="calendar-wrapper">
+    <table class="calendar" id="calendarTable"></table>
+  </div>
 
   <script>
-    const sites = ["現場1", "現場2", "現場3", "現場4", "現場5"];
+    const sites = ["現場1", "現場2", "現場3", "現場4"];
     let year = 2025;
     let month = 6;
 
@@ -135,72 +139,11 @@
       drawer.style.display = drawer.style.display === "flex" ? "none" : "flex";
     }
 
-    function setPage(title) {
-      document.getElementById("pageTitle").textContent = title;
+    function setPage(name) {
+      document.getElementById("pageTitle").textContent = name;
       toggleMenu();
-      if (title === "スケジュール表示") {
-        renderTable();
-      } else {
-        document.getElementById("calendarContainer").innerHTML = `<p style="text-align:center;margin-top:30px;">「${title}」画面は現在準備中です。</p>`;
-      }
-    }
-
-    function getDaysInMonth(y, m) {
-      return new Date(y, m, 0).getDate();
-    }
-
-    function renderTable() {
-      const days = getDaysInMonth(year, month);
-      const container = document.getElementById("calendarContainer");
-      container.innerHTML = "";
-
-      const table = document.createElement("table");
-
-      // 1行目：空白セル + 日付行
-      const headerRow = document.createElement("tr");
-      const emptyHeader = document.createElement("th");
-      emptyHeader.textContent = "";
-      headerRow.appendChild(emptyHeader);
-
-      for (let d = 1; d <= days; d++) {
-        const date = new Date(year, month - 1, d);
-        const day = date.getDay();
-        const th = document.createElement("th");
-        th.innerHTML = `${d}<br>(${["日","月","火","水","木","金","土"][day]})`;
-        if (day === 0) th.classList.add("sunday");
-        if (day === 6) th.classList.add("saturday");
-        headerRow.appendChild(th);
-      }
-      table.appendChild(headerRow);
-
-      // 2行目：空き状況ラベル + 空セル
-      const statusRow = document.createElement("tr");
-      const statusCell = document.createElement("td");
-      statusCell.textContent = "空き状況";
-      statusCell.className = "site-name";
-      statusRow.appendChild(statusCell);
-      for (let d = 1; d <= days; d++) {
-        const td = document.createElement("td");
-        statusRow.appendChild(td);
-      }
-      table.appendChild(statusRow);
-
-      // 現場行
-      for (const site of sites) {
-        const row = document.createElement("tr");
-        const siteCell = document.createElement("td");
-        siteCell.textContent = site;
-        siteCell.className = "site-name";
-        row.appendChild(siteCell);
-        for (let d = 1; d <= days; d++) {
-          const td = document.createElement("td");
-          row.appendChild(td);
-        }
-        table.appendChild(row);
-      }
-
-      container.appendChild(table);
-      document.getElementById("monthLabel").textContent = `${year}年${month}月`;
+      if (name === "スケジュール表示") renderTable();
+      else document.getElementById("calendarTable").innerHTML = `<tr><td colspan="99">「${name}」画面は準備中</td></tr>`;
     }
 
     function changeMonth(offset) {
@@ -215,8 +158,55 @@
       renderTable();
     }
 
-    function changeBranch() {
-      renderTable();
+    function renderTable() {
+      const table = document.getElementById("calendarTable");
+      table.innerHTML = "";
+
+      const days = new Date(year, month, 0).getDate();
+      document.getElementById("monthLabel").textContent = `${year}年${month}月`;
+
+      // 1行目：空白セル + 日付と曜日
+      const headerRow = document.createElement("tr");
+      const emptyTh = document.createElement("th");
+      emptyTh.className = "fixed-col";
+      emptyTh.textContent = "";
+      headerRow.appendChild(emptyTh);
+      for (let d = 1; d <= days; d++) {
+        const date = new Date(year, month - 1, d);
+        const day = date.getDay();
+        const th = document.createElement("th");
+        th.innerHTML = `${d}<br>(${["日","月","火","水","木","金","土"][day]})`;
+        if (day === 0) th.classList.add("sunday");
+        if (day === 6) th.classList.add("saturday");
+        headerRow.appendChild(th);
+      }
+      table.appendChild(headerRow);
+
+      // 2行目：空き状況
+      const statusRow = document.createElement("tr");
+      const statusLabel = document.createElement("td");
+      statusLabel.className = "fixed-col";
+      statusLabel.textContent = "空き状況";
+      statusRow.appendChild(statusLabel);
+      for (let i = 1; i <= days; i++) {
+        const td = document.createElement("td");
+        statusRow.appendChild(td);
+      }
+      table.appendChild(statusRow);
+
+      // 各現場行
+      for (const site of sites) {
+        const row = document.createElement("tr");
+        const label = document.createElement("td");
+        label.textContent = site;
+        label.className = "fixed-col";
+        row.appendChild(label);
+        for (let i = 1; i <= days; i++) {
+          const td = document.createElement("td");
+          row.appendChild(td);
+        }
+        table.appendChild(row);
+      }
     }
 
     renderTable();
