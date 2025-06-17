@@ -17,8 +17,6 @@
       height: 100vh;
     }
     .header {
-      display: flex;
-      flex-direction: column;
       background: #f0f0f0;
       border-bottom: 1px solid #ccc;
     }
@@ -28,6 +26,7 @@
       padding: 8px;
       display: flex;
       align-items: center;
+      position: relative;
     }
     .menu-button {
       cursor: pointer;
@@ -35,24 +34,24 @@
     }
     .menu-list {
       display: none;
-      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      left: 0;
       background: #444;
       color: white;
       padding: 10px;
+      z-index: 10;
     }
     .menu-list a {
       color: white;
       text-decoration: none;
       padding: 5px 0;
-      cursor: pointer;
+      display: block;
     }
     .menu-list.show {
-      display: flex;
+      display: block;
     }
-    .calendar-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .calendar-header, .location-select {
       padding: 8px;
     }
     .calendar-area {
@@ -90,23 +89,22 @@
     .saturday {
       color: blue;
     }
-    .view {
-      display: none;
-      padding: 10px;
-    }
-    .view.active {
-      display: block;
+    .content-area {
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
     }
     .form-group {
       margin-bottom: 10px;
     }
-    .form-group label {
+    label {
       display: block;
       margin-bottom: 4px;
     }
-    .form-group input, .form-group select {
+    input, select {
       width: 100%;
-      padding: 6px;
+      padding: 8px;
+      box-sizing: border-box;
     }
   </style>
 </head>
@@ -116,56 +114,52 @@
       <div class="menu-bar">
         <div class="menu-button" onclick="toggleMenu()">≡</div>
         <div>スケジュールアプリ</div>
+        <div class="menu-list" id="menu">
+          <a href="#" onclick="showView('calendar')">スケジュール表示</a>
+          <a href="#" onclick="showView('siteRegister')">現場登録</a>
+          <a href="#">従業員・車両配置登録</a>
+          <a href="#">従業員情報登録</a>
+          <a href="#">車両情報登録</a>
+        </div>
       </div>
-      <div class="menu-list" id="menu">
-        <a onclick="switchView('schedule')">スケジュール表示</a>
-        <a onclick="switchView('site-registration')">現場登録</a>
-        <a href="#">従業員・車両配置登録</a>
-        <a href="#">従業員情報登録</a>
-        <a href="#">車両情報登録</a>
+      <div id="calendarControls">
+        <div class="calendar-header">
+          <button onclick="changeMonth(-1)">前月</button>
+          <div id="current-month">2025年6月</div>
+          <button onclick="changeMonth(1)">翌月</button>
+        </div>
+        <div class="location-select">拠点：<select id="location">
+          <option>本社</option>
+          <option>横浜</option>
+        </select></div>
       </div>
-      <div class="calendar-header">
-        <button onclick="changeMonth(-1)">前月</button>
-        <div id="current-month">2025年6月</div>
-        <button onclick="changeMonth(1)">翌月</button>
-      </div>
-      <div style="padding: 0 8px;">拠点：<select id="location">
-        <option>本社</option>
-        <option>横浜</option>
-      </select></div>
     </div>
-
-    <!-- スケジュール表示 -->
-    <div class="calendar-area view active" id="schedule-view">
+    <div class="calendar-area" id="calendarView">
       <table id="calendar"></table>
     </div>
-
-    <!-- 現場登録画面 -->
-    <div class="view" id="site-registration">
-      <h2>現場登録</h2>
+    <div class="content-area" id="siteRegisterView" style="display: none;">
       <div class="form-group">
         <label>現場名</label>
         <input type="text" />
       </div>
       <div class="form-group">
-        <label>現場住所</label>
-        <input type="text" />
-      </div>
-      <div class="form-group">
-        <label>現場所属</label>
+        <label>所属</label>
         <select>
           <option>本社</option>
           <option>横浜</option>
         </select>
       </div>
       <div class="form-group">
-        <label>備考</label>
-        <input type="text" />
+        <label>工期（開始）</label>
+        <input type="date" />
+      </div>
+      <div class="form-group">
+        <label>工期（終了）</label>
+        <input type="date" />
       </div>
       <button>登録</button>
     </div>
   </div>
-
   <script>
     const calendar = document.getElementById("calendar");
     let currentYear = 2025;
@@ -173,12 +167,6 @@
 
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
-    }
-
-    function switchView(viewId) {
-      document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-      document.getElementById(viewId + '-view')?.classList.add('active');
-      document.getElementById(viewId)?.classList.add('active');
     }
 
     function renderCalendar(year, month) {
@@ -215,6 +203,12 @@
         currentYear++;
       }
       renderCalendar(currentYear, currentMonth);
+    }
+
+    function showView(view) {
+      document.getElementById("calendarView").style.display = view === 'calendar' ? 'block' : 'none';
+      document.getElementById("siteRegisterView").style.display = view === 'siteRegister' ? 'block' : 'none';
+      document.getElementById("calendarControls").style.display = view === 'calendar' ? 'block' : 'none';
     }
 
     renderCalendar(currentYear, currentMonth);
