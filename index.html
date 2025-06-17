@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>スケジュール表示</title>
+  <title>スケジュールアプリ</title>
   <style>
     body {
       font-family: sans-serif;
@@ -33,9 +33,6 @@
       cursor: pointer;
       margin-right: 10px;
     }
-    .menu-title {
-      font-weight: bold;
-    }
     .menu-list {
       display: none;
       flex-direction: column;
@@ -59,10 +56,9 @@
       padding: 8px;
     }
     .calendar-area {
-  flex: 1;
-  overflow: auto;
-  padding-bottom: 80px; /* ← 追加して下の余白を確保 */
-}
+      flex: 1;
+      overflow: auto;
+    }
     table {
       border-collapse: collapse;
       width: max-content;
@@ -72,7 +68,6 @@
       width: 100px;
       height: 40px;
       text-align: center;
-      background: #fff;
     }
     th.sticky-top {
       position: sticky;
@@ -87,10 +82,6 @@
       z-index: 1;
     }
     th.sticky-corner {
-      position: sticky;
-      top: 0;
-      left: 0;
-      background: #fff;
       z-index: 3;
     }
     .sunday {
@@ -99,6 +90,24 @@
     .saturday {
       color: blue;
     }
+    .view {
+      display: none;
+      padding: 10px;
+    }
+    .view.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 4px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 6px;
+    }
   </style>
 </head>
 <body>
@@ -106,11 +115,11 @@
     <div class="header">
       <div class="menu-bar">
         <div class="menu-button" onclick="toggleMenu()">≡</div>
-        <div class="menu-title">スケジュール表示</div>
+        <div>スケジュールアプリ</div>
       </div>
       <div class="menu-list" id="menu">
-        <a onclick="reloadSchedule()">スケジュール表示</a>
-        <a href="#">現場登録</a>
+        <a onclick="switchView('schedule')">スケジュール表示</a>
+        <a onclick="switchView('site-registration')">現場登録</a>
         <a href="#">従業員・車両配置登録</a>
         <a href="#">従業員情報登録</a>
         <a href="#">車両情報登録</a>
@@ -120,16 +129,40 @@
         <div id="current-month">2025年6月</div>
         <button onclick="changeMonth(1)">翌月</button>
       </div>
-      <div style="padding: 0 8px;">
-        拠点：
-        <select id="location">
+      <div style="padding: 0 8px;">拠点：<select id="location">
+        <option>本社</option>
+        <option>横浜</option>
+      </select></div>
+    </div>
+
+    <!-- スケジュール表示 -->
+    <div class="calendar-area view active" id="schedule-view">
+      <table id="calendar"></table>
+    </div>
+
+    <!-- 現場登録画面 -->
+    <div class="view" id="site-registration">
+      <h2>現場登録</h2>
+      <div class="form-group">
+        <label>現場名</label>
+        <input type="text" />
+      </div>
+      <div class="form-group">
+        <label>現場住所</label>
+        <input type="text" />
+      </div>
+      <div class="form-group">
+        <label>現場所属</label>
+        <select>
           <option>本社</option>
           <option>横浜</option>
         </select>
       </div>
-    </div>
-    <div class="calendar-area">
-      <table id="calendar"></table>
+      <div class="form-group">
+        <label>備考</label>
+        <input type="text" />
+      </div>
+      <button>登録</button>
     </div>
   </div>
 
@@ -142,14 +175,15 @@
       document.getElementById("menu").classList.toggle("show");
     }
 
-    function reloadSchedule() {
-      renderCalendar(currentYear, currentMonth);
-      document.getElementById("menu").classList.remove("show");
+    function switchView(viewId) {
+      document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+      document.getElementById(viewId + '-view')?.classList.add('active');
+      document.getElementById(viewId)?.classList.add('active');
     }
 
     function renderCalendar(year, month) {
       const daysInMonth = new Date(year, month, 0).getDate();
-      const firstRow = [`<th class="sticky-corner"></th>`];
+      const firstRow = [`<th class="sticky-top sticky-left sticky-corner"></th>`];
       const secondRow = [`<td class="sticky-left">空き状況</td>`];
 
       for (let d = 1; d <= daysInMonth; d++) {
