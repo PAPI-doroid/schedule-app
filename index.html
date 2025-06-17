@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>スケジュール表示</title>
+  <title>スケジュールアプリ</title>
   <style>
-    * { box-sizing: border-box; }
     body {
       font-family: sans-serif;
       margin: 0;
@@ -18,10 +17,10 @@
       height: 100vh;
     }
     .header {
+      display: flex;
+      flex-direction: column;
       background: #f0f0f0;
       border-bottom: 1px solid #ccc;
-      position: relative;
-      z-index: 10;
     }
     .menu-bar {
       background: #333;
@@ -30,12 +29,11 @@
       display: flex;
       align-items: center;
       position: relative;
+      z-index: 10;
     }
     .menu-button {
       cursor: pointer;
       margin-right: 10px;
-      font-size: 24px;
-      user-select: none;
     }
     .menu-list {
       display: none;
@@ -47,15 +45,15 @@
       padding: 10px;
       flex-direction: column;
       width: 200px;
-      z-index: 999;
-    }
-    .menu-list.show {
-      display: flex;
+      z-index: 20;
     }
     .menu-list a {
       color: white;
       text-decoration: none;
-      padding: 8px 0;
+      padding: 5px 0;
+    }
+    .menu-list.show {
+      display: flex;
     }
     .calendar-header {
       display: flex;
@@ -63,13 +61,6 @@
       align-items: center;
       padding: 8px;
       gap: 10px;
-    }
-    .calendar-header button {
-      padding: 6px 12px;
-      font-size: 14px;
-    }
-    .location-selector {
-      padding: 0 8px 8px 8px;
     }
     .calendar-area {
       flex: 1;
@@ -85,7 +76,6 @@
       width: 100px;
       height: 40px;
       text-align: center;
-      background: white;
     }
     th.sticky-top {
       position: sticky;
@@ -100,33 +90,30 @@
       z-index: 1;
     }
     th.sticky-corner {
-      position: sticky;
-      top: 0;
-      left: 0;
       z-index: 3;
-      background: #fff;
     }
-    .sunday { color: red; }
-    .saturday { color: blue; }
-
-    /* === 現場登録画面 === */
+    .sunday {
+      color: red;
+    }
+    .saturday {
+      color: blue;
+    }
+    .location-selector {
+      padding: 0 8px;
+      margin-bottom: 8px;
+    }
     .site-form {
-      padding: 20px;
       display: none;
+      padding: 16px;
     }
-    .site-form label {
+    .site-form input, .site-form select {
       display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    .site-form input {
-      padding: 6px;
-      width: 100%;
-      max-width: 300px;
+      margin-bottom: 10px;
+      padding: 5px;
+      width: 200px;
     }
     .site-form button {
-      margin-top: 20px;
-      padding: 8px 16px;
+      padding: 6px 12px;
     }
   </style>
 </head>
@@ -159,26 +146,31 @@
       </div>
     </div>
 
-<div class="site-form" id="site-form">
-  <h2>現場登録</h2>
+    <div class="calendar-area" id="calendar-area">
+      <table id="calendar"></table>
+    </div>
 
-  <label>拠点</label>
-  <select id="site-location">
-    <option>本社</option>
-    <option>横浜</option>
-  </select>
+    <div class="site-form" id="site-form">
+      <h2>現場登録</h2>
 
-  <label>現場名</label>
-  <input type="text" id="site-name" />
+      <label>拠点</label>
+      <select id="site-location">
+        <option>本社</option>
+        <option>横浜</option>
+      </select>
 
-  <label>工期（開始）</label>
-  <input type="date" id="start-date" />
+      <label>現場名</label>
+      <input type="text" id="site-name" />
 
-  <label>工期（終了）</label>
-  <input type="date" id="end-date" />
+      <label>工期（開始）</label>
+      <input type="date" id="start-date" />
 
-  <button onclick="alert('保存されました（仮）')">保存</button>
-</div>
+      <label>工期（終了）</label>
+      <input type="date" id="end-date" />
+
+      <button onclick="alert('保存されました（仮）')">保存</button>
+    </div>
+  </div>
 
   <script>
     const calendar = document.getElementById("calendar");
@@ -191,14 +183,14 @@
 
     function switchView(view) {
       document.getElementById("menu").classList.remove("show");
-      document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
+      document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("site-form").style.display = view === 'site' ? 'block' : 'none';
     }
 
     function renderCalendar(year, month) {
       const daysInMonth = new Date(year, month, 0).getDate();
-      const firstRow = [`<th class="sticky-corner"></th>`];
+      const firstRow = [`<th class="sticky-top sticky-left sticky-corner"></th>`];
       const secondRow = [`<td class="sticky-left">空き状況</td>`];
 
       for (let d = 1; d <= daysInMonth; d++) {
