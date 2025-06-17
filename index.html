@@ -5,76 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>スケジュールアプリ</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
+</head>
+<body>
+  <div class="wrapper">
+    <div class="corner">現場名</div>
+    <div class="header" id="header"></div>
+    <div class="row-labels" id="row-labels"></div>
+    <div class="content" id="content"></div>
+  </div>
+
+  <script>
+    const days = 31;
+    const sites = ["現場K1", "現場L1", "現場M1", "現場N1", "現場O1", "現場P1", "現場Q1", "現場R1", "現場S1", "現場T1", "現場U1"];
+
+    const header = document.getElementById("header");
+    const rowLabels = document.getElementById("row-labels");
+    const content = document.getElementById("content");
+
+    for (let d = 1; d <= days; d++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = `${d}日`;
+      header.appendChild(cell);
     }
 
-    .wrapper {
-      display: grid;
-      grid-template-columns: 120px auto;
-      grid-template-rows: 40px auto;
-      height: 100vh;
-      overflow: hidden;
+    for (let site of sites) {
+      const label = document.createElement("div");
+      label.className = "row-label";
+      label.textContent = site;
+      rowLabels.appendChild(label);
+
+      const row = document.createElement("div");
+      row.className = "content-row";
+      for (let d = 1; d <= days; d++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        row.appendChild(cell);
+      }
+      content.appendChild(row);
     }
 
-    .corner {
-      grid-column: 1 / 2;
-      grid-row: 1 / 2;
-      background: #e0e0e0;
-      border-right: 1px solid #ccc;
-      border-bottom: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      z-index: 3;
-      position: sticky;
-      top: 0;
-      left: 0;
-    }
-
-    .header {
-      grid-column: 2 / 3;
-      grid-row: 1 / 2;
-      overflow-x: auto;
-      white-space: nowrap;
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      background: #f0f0f0;
-      border-bottom: 1px solid #ccc;
-    }
-
-    .header .cell {
-      display: inline-block;
-      width: 100px;
-      height: 40px;
-      line-height: 40px;
-      text-align: center;
-      border-right: 1px solid #ccc;
-      font-weight: bold;
-    }
-
-    .row-labels {
-      grid-column: 1 / 2;
-      grid-row: 2 / 3;
-      overflow-y: auto;
-      background: #fff;
-      border-right: 1px solid #ccc;
-    }
-
-    .row-label {
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid #ccc;
-      font-weight: bold;
-      background: #fff;
-    }
-
-    .content {
-      grid-column: 2 / 3;
-      grid-row: 2 / 3
+    content.addEventListener('scroll', () => {
+      rowLabels.scrollTop = content.scrollTop;
+    });
+  </script>
+</body>
+</html>
