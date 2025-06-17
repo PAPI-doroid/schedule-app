@@ -21,7 +21,6 @@
       flex-direction: column;
       background: #f0f0f0;
       border-bottom: 1px solid #ccc;
-      z-index: 5;
     }
     .menu-bar {
       background: #333;
@@ -29,15 +28,11 @@
       padding: 8px;
       display: flex;
       align-items: center;
-      position: relative;
-      z-index: 10;
     }
     .menu-button {
       cursor: pointer;
       margin-right: 10px;
-      font-size: 24px;
-      padding: 8px;
-      user-select: none;
+      font-size: 20px;
     }
     .menu-list {
       display: none;
@@ -45,24 +40,29 @@
       background: #444;
       color: white;
       padding: 10px;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      z-index: 9;
     }
     .menu-list a {
       color: white;
       text-decoration: none;
       padding: 5px 0;
+      cursor: pointer;
     }
     .menu-list.show {
       display: flex;
+      position: absolute;
+      top: 40px;
+      left: 0;
+      width: 200px;
+      z-index: 10;
     }
     .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 8px;
+    }
+    .location-select {
+      padding: 0 8px 8px;
     }
     .calendar-area {
       flex: 1;
@@ -99,38 +99,66 @@
     .saturday {
       color: blue;
     }
+    .screen {
+      display: none;
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .screen.active {
+      display: block;
+    }
+    input, select, button {
+      margin: 8px 0;
+      padding: 6px;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <div class="menu-bar">
-        <div class="menu-button" onclick="toggleMenu()" tabindex="0" role="button">≡</div>
-        <div>スケジュールアプリ</div>
-        <div class="menu-list" id="menu">
-          <a href="#" onclick="showSchedule()">スケジュール表示</a>
-          <a href="#" onclick="showPlaceholder('現場登録')">現場登録</a>
-          <a href="#" onclick="showPlaceholder('従業員・車両配置登録')">従業員・車両配置登録</a>
-          <a href="#" onclick="showPlaceholder('従業員情報登録')">従業員情報登録</a>
-          <a href="#" onclick="showPlaceholder('車両情報登録')">車両情報登録</a>
-        </div>
+        <div class="menu-button" onclick="toggleMenu()">≡</div>
+        <div id="header-title">スケジュール表示</div>
       </div>
-      <div class="calendar-header" id="calendar-header">
+      <div class="menu-list" id="menu">
+        <a onclick="switchScreen('schedule')">スケジュール表示</a>
+        <a onclick="switchScreen('site')">現場登録</a>
+        <a onclick="switchScreen('assign')">従業員・車両配置登録</a>
+        <a onclick="switchScreen('employee')">従業員情報登録</a>
+        <a onclick="switchScreen('vehicle')">車両情報登録</a>
+      </div>
+      <div id="calendar-header" class="calendar-header">
         <button onclick="changeMonth(-1)">前月</button>
         <div id="current-month">2025年6月</div>
         <button onclick="changeMonth(1)">翌月</button>
       </div>
-      <div style="padding: 0 8px;" id="location-select">
+      <div id="location-select" class="location-select">
         拠点：<select id="location">
           <option>本社</option>
           <option>横浜</option>
         </select>
       </div>
     </div>
-    <div class="calendar-area" id="calendar-area">
+
+    <div class="calendar-area screen active" id="schedule">
       <table id="calendar"></table>
     </div>
-    <div id="placeholder" style="display:none; padding: 20px;">他の画面を表示中</div>
+
+    <div class="screen" id="site">
+      <h3>現場登録</h3>
+      <input type="text" placeholder="現場名" />
+      <label>工期（開始）:</label>
+      <input type="date" />
+      <label>工期（終了）:</label>
+      <input type="date" />
+      <button>登録</button>
+    </div>
+
+    <div class="screen" id="assign"><h3>従業員・車両配置登録</h3></div>
+    <div class="screen" id="employee"><h3>従業員情報登録</h3></div>
+    <div class="screen" id="vehicle"><h3>車両情報登録</h3></div>
   </div>
 
   <script>
@@ -142,22 +170,14 @@
       document.getElementById("menu").classList.toggle("show");
     }
 
-    function showSchedule() {
-      document.getElementById("calendar-area").style.display = "block";
-      document.getElementById("calendar-header").style.display = "flex";
-      document.getElementById("location-select").style.display = "block";
-      document.getElementById("placeholder").style.display = "none";
-      toggleMenu();
-    }
-
-    function showPlaceholder(text) {
-      document.getElementById("calendar-area").style.display = "none";
-      document.getElementById("calendar-header").style.display = "none";
-      document.getElementById("location-select").style.display = "none";
-      const p = document.getElementById("placeholder");
-      p.textContent = `${text}画面を表示中`;
-      p.style.display = "block";
-      toggleMenu();
+    function switchScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById("header-title").textContent = document.querySelector(`[onclick="switchScreen('${id}')"]`).textContent;
+      document.getElementById("menu").classList.remove("show");
+      const isSchedule = id === 'schedule';
+      document.getElementById("calendar-header").style.display = isSchedule ? 'flex' : 'none';
+      document.getElementById("location-select").style.display = isSchedule ? 'block' : 'none';
     }
 
     function renderCalendar(year, month) {
@@ -195,8 +215,6 @@
       }
       renderCalendar(currentYear, currentMonth);
     }
-
-    document.querySelector('.menu-button').addEventListener('touchstart', toggleMenu);
 
     renderCalendar(currentYear, currentMonth);
   </script>
