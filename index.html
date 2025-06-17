@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>スケジュールアプリ</title>
+  <title>スケジュール表示</title>
   <style>
     body {
       font-family: sans-serif;
@@ -21,6 +21,7 @@
       flex-direction: column;
       background: #f0f0f0;
       border-bottom: 1px solid #ccc;
+      z-index: 5;
     }
     .menu-bar {
       background: #333;
@@ -28,10 +29,15 @@
       padding: 8px;
       display: flex;
       align-items: center;
+      position: relative;
+      z-index: 10;
     }
     .menu-button {
       cursor: pointer;
       margin-right: 10px;
+      font-size: 24px;
+      padding: 8px;
+      user-select: none;
     }
     .menu-list {
       display: none;
@@ -40,9 +46,9 @@
       color: white;
       padding: 10px;
       position: absolute;
-      top: 40px;
+      top: 100%;
       left: 0;
-      z-index: 10;
+      z-index: 9;
     }
     .menu-list a {
       color: white;
@@ -93,78 +99,42 @@
     .saturday {
       color: blue;
     }
-    .content {
-      display: none;
-      padding: 10px;
-      overflow-y: auto;
-      height: 100%;
-    }
-    .content.active {
-      display: block;
-    }
-    form input, form select {
-      margin: 5px 0;
-      width: 100%;
-      padding: 5px;
-      box-sizing: border-box;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
- <div class="menu-bar">
-  <div class="menu-button" onclick="toggleMenu()" tabindex="0" role="button">≡</div>
-  <div>スケジュールアプリ</div>
-</div>
-      <div class="menu-list" id="menu">
-        <a href="#" onclick="showPage('calendar')">スケジュール表示</a>
-        <a href="#" onclick="showPage('site-form')">現場登録</a>
-        <a href="#">従業員・車両配置登録</a>
-        <a href="#">従業員情報登録</a>
-        <a href="#">車両情報登録</a>
-      </div>
-      <div id="calendar-header">
-        <div class="calendar-header">
-          <button onclick="changeMonth(-1)">前月</button>
-          <div id="current-month">2025年6月</div>
-          <button onclick="changeMonth(1)">翌月</button>
+      <div class="menu-bar">
+        <div class="menu-button" onclick="toggleMenu()" tabindex="0" role="button">≡</div>
+        <div>スケジュールアプリ</div>
+        <div class="menu-list" id="menu">
+          <a href="#" onclick="showSchedule()">スケジュール表示</a>
+          <a href="#" onclick="showPlaceholder('現場登録')">現場登録</a>
+          <a href="#" onclick="showPlaceholder('従業員・車両配置登録')">従業員・車両配置登録</a>
+          <a href="#" onclick="showPlaceholder('従業員情報登録')">従業員情報登録</a>
+          <a href="#" onclick="showPlaceholder('車両情報登録')">車両情報登録</a>
         </div>
-        <div style="padding: 0 8px;">拠点：<select id="location">
-          <option>本社</option>
-          <option>横浜</option>
-        </select></div>
       </div>
-    </div>
-
-    <!-- スケジュール表示 -->
-    <div class="calendar-area content active" id="calendar">
-      <table id="calendar-table"></table>
-    </div>
-
-    <!-- 現場登録画面 -->
-    <div class="content" id="site-form">
-      <h2>現場登録</h2>
-      <form>
-        <label>現場名:</label>
-        <input type="text" placeholder="現場名" />
-        <label>所属:</label>
-        <select>
+      <div class="calendar-header" id="calendar-header">
+        <button onclick="changeMonth(-1)">前月</button>
+        <div id="current-month">2025年6月</div>
+        <button onclick="changeMonth(1)">翌月</button>
+      </div>
+      <div style="padding: 0 8px;" id="location-select">
+        拠点：<select id="location">
           <option>本社</option>
           <option>横浜</option>
         </select>
-        <label>工期（開始）:</label>
-        <input type="date" />
-        <label>工期（終了）:</label>
-        <input type="date" />
-        <button type="submit">登録</button>
-      </form>
+      </div>
     </div>
+    <div class="calendar-area" id="calendar-area">
+      <table id="calendar"></table>
+    </div>
+    <div id="placeholder" style="display:none; padding: 20px;">他の画面を表示中</div>
   </div>
 
   <script>
-    const calendarTable = document.getElementById("calendar-table");
-    const calendarDiv = document.getElementById("calendar");
+    const calendar = document.getElementById("calendar");
     let currentYear = 2025;
     let currentMonth = 6;
 
@@ -172,12 +142,22 @@
       document.getElementById("menu").classList.toggle("show");
     }
 
-    function showPage(id) {
-      document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      document.getElementById("menu").classList.remove("show");
-      // 月と拠点の表示切り替え
-      document.getElementById("calendar-header").style.display = (id === 'calendar') ? 'block' : 'none';
+    function showSchedule() {
+      document.getElementById("calendar-area").style.display = "block";
+      document.getElementById("calendar-header").style.display = "flex";
+      document.getElementById("location-select").style.display = "block";
+      document.getElementById("placeholder").style.display = "none";
+      toggleMenu();
+    }
+
+    function showPlaceholder(text) {
+      document.getElementById("calendar-area").style.display = "none";
+      document.getElementById("calendar-header").style.display = "none";
+      document.getElementById("location-select").style.display = "none";
+      const p = document.getElementById("placeholder");
+      p.textContent = `${text}画面を表示中`;
+      p.style.display = "block";
+      toggleMenu();
     }
 
     function renderCalendar(year, month) {
@@ -200,7 +180,7 @@
         rows.push("<tr>" + row.join("") + "</tr>");
       }
 
-      calendarTable.innerHTML = rows.join("");
+      calendar.innerHTML = rows.join("");
       document.getElementById("current-month").textContent = `${year}年${month}月`;
     }
 
@@ -215,6 +195,8 @@
       }
       renderCalendar(currentYear, currentMonth);
     }
+
+    document.querySelector('.menu-button').addEventListener('touchstart', toggleMenu);
 
     renderCalendar(currentYear, currentMonth);
   </script>
