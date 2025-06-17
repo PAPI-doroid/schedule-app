@@ -159,24 +159,28 @@
       </div>
     </div>
 
-    <div class="calendar-area" id="calendar-area">
-      <table id="calendar"></table>
-    </div>
+    <!-- site-form（現場登録フォーム）の中身だけ貼り替えてOK -->
+<div class="site-form" id="site-form">
+  <h2>現場登録</h2>
 
-    <div class="site-form" id="site-form">
-      <h2>現場登録</h2>
-      <label>現場名</label>
-      <input type="text" id="site-name" />
+  <label>拠点</label>
+  <select id="site-location">
+    <option>本社</option>
+    <option>横浜</option>
+  </select>
 
-      <label>工期（開始）</label>
-      <input type="date" id="start-date" />
+  <label>現場名</label>
+  <input type="text" id="site-name" />
 
-      <label>工期（終了）</label>
-      <input type="date" id="end-date" />
+  <label>工期（開始）</label>
+  <input type="date" id="start-date" />
 
-      <button onclick="alert('保存されました（仮）')">保存</button>
-    </div>
-  </div>
+  <label>工期（終了）</label>
+  <input type="date" id="end-date" />
+
+  <button onclick="alert('保存されました（仮）')">保存</button>
+</div>
+
 
   <script>
     const calendar = document.getElementById("calendar");
