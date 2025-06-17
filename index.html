@@ -52,8 +52,10 @@
     .month-bar {
       display: flex;
       justify-content: center;
+      align-items: center;
       gap: 20px;
       padding: 10px;
+      flex-wrap: wrap;
     }
 
     .content {
@@ -100,6 +102,11 @@
     .sunday {
       color: red;
     }
+
+    select {
+      padding: 6px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -122,6 +129,13 @@
     <button onclick="changeMonth(-1)">前月</button>
     <div id="monthLabel">2025年6月</div>
     <button onclick="changeMonth(1)">翌月</button>
+
+    <!-- 拠点セレクター追加 -->
+    <label for="branchSelect">拠点：</label>
+    <select id="branchSelect" onchange="changeBranch()">
+      <option value="本社">本社</option>
+      <option value="横浜">横浜</option>
+    </select>
   </div>
 
   <div style="overflow-x: auto;">
@@ -136,19 +150,25 @@
   const monthLabel = document.getElementById("monthLabel");
   const tableHead = document.querySelector("#scheduleTable thead");
   const tableBody = document.querySelector("#scheduleTable tbody");
+  const branchSelect = document.getElementById("branchSelect");
 
   let current = new Date(2025, 5); // 2025年6月
-  const sites = ["現場1", "現場2", "現場3", "現場4"];
+  let currentBranch = "本社";
+
+  const sitesMap = {
+    "本社": ["現場1", "現場2", "現場3"],
+    "横浜": ["現場A", "現場B", "現場C"]
+  };
 
   function renderTable() {
     const year = current.getFullYear();
     const month = current.getMonth();
     const firstDate = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const sites = sitesMap[currentBranch];
 
     monthLabel.textContent = `${year}年${month + 1}月`;
 
-    // ヘッダー1行目（左上は空、日付と曜日）
     const row1 = document.createElement("tr");
     row1.innerHTML = `<th class="sticky-top sticky-left corner"></th>`;
     for (let d = 1; d <= daysInMonth; d++) {
@@ -161,14 +181,12 @@
     tableHead.innerHTML = "";
     tableHead.appendChild(row1);
 
-    // 2行目（空き状況）
     const row2 = document.createElement("tr");
     row2.innerHTML = `<td class="sticky-left">空き状況</td>`;
     for (let d = 1; d <= daysInMonth; d++) {
       row2.innerHTML += `<td></td>`;
     }
 
-    // 残りの現場行
     tableBody.innerHTML = "";
     tableBody.appendChild(row2);
     for (let site of sites) {
@@ -186,12 +204,16 @@
     renderTable();
   }
 
+  function changeBranch() {
+    currentBranch = branchSelect.value;
+    renderTable();
+  }
+
   function toggleMenu() {
     document.getElementById("menu").classList.toggle("active");
   }
 
   function showSection(id) {
-    // 今後のためのセクション切り替え用
     alert(`${id}ページ表示（仮）`);
     document.getElementById("menu").classList.remove("active");
   }
