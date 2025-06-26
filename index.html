@@ -147,17 +147,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    window.db = db;
-    window.ref = ref;
-    window.push = push;
-    window.set = set;
-    window.onValue = onValue;
+    let sites = [];
 
-    window.fetchSites = function() {
+    function fetchSites() {
       const siteRef = ref(db, 'sites');
       onValue(siteRef, (snapshot) => {
         const data = snapshot.val();
-        window.sites = data ? Object.values(data) : [];
+        sites = data ? Object.values(data) : [];
         renderCalendar(currentYear, currentMonth);
       });
     }
@@ -173,7 +169,10 @@
         const newSiteRef = push(ref(db, 'sites'));
         set(newSiteRef, newSite).then(() => {
           alert('現場登録が完了しました');
-          fetchSites();
+          document.getElementById("site-name").value = '';
+          document.getElementById("site-location").value = '本社';
+          document.getElementById("site-start").value = '';
+          document.getElementById("site-end").value = '';
           switchView('schedule');
         });
       } else {
@@ -181,7 +180,7 @@
       }
     }
 
-    window.fetchSites();
+    window.fetchSites = fetchSites;
   </script>
 </head>
 <body>
@@ -241,7 +240,6 @@
     const calendar = document.getElementById("calendar");
     let currentYear = 2025;
     let currentMonth = 6;
-    let sites = [];
 
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
@@ -252,13 +250,6 @@
       document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("site-register").style.display = view === 'site' ? 'block' : 'none';
-
-      if (view === 'site') {
-        document.getElementById("site-name").value = '';
-        document.getElementById("site-location").value = '本社';
-        document.getElementById("site-start").value = '';
-        document.getElementById("site-end").value = '';
-      }
     }
 
     function renderCalendar(year, month) {
@@ -309,6 +300,8 @@
       }
       renderCalendar(currentYear, currentMonth);
     }
+
+    fetchSites();
   </script>
 </body>
 </html>
