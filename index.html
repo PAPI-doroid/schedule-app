@@ -130,6 +130,22 @@
       width: 200px;
     }
   </style>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAdX0q9PyvSwxSzXS3nj7Rivz420tEpxU",
+      authDomain: "schedule-app-faf39.firebaseapp.com",
+      databaseURL: "https://schedule-app-faf39-default-rtdb.firebaseio.com",
+      projectId: "schedule-app-faf39",
+      storageBucket: "schedule-app-faf39.appspot.com",
+      messagingSenderId: "56363342875",
+      appId: "1:56363342875:web:585c9a2a11f9874a58785e"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+  </script>
 </head>
 <body>
   <div class="container">
@@ -199,6 +215,13 @@
       document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("site-register").style.display = view === 'site' ? 'block' : 'none';
+
+      if (view === 'site') {
+        document.getElementById("site-name").value = '';
+        document.getElementById("site-location").value = '本社';
+        document.getElementById("site-start").value = '';
+        document.getElementById("site-end").value = '';
+      }
     }
 
     function registerSite() {
@@ -208,13 +231,28 @@
       const end = document.getElementById("site-end").value;
 
       if (name && start && end) {
-        sites.push({ name, location, start, end });
-        alert('現場登録が完了しました');
-        renderCalendar(currentYear, currentMonth);
-        switchView('schedule');
+        const newSite = { name, location, start, end };
+        const newSiteRef = database.ref('sites').push();
+        newSiteRef.set(newSite, (error) => {
+          if (error) {
+            alert('登録に失敗しました');
+          } else {
+            alert('現場登録が完了しました');
+            fetchSites();
+            switchView('schedule');
+          }
+        });
       } else {
         alert('すべての項目を入力してください');
       }
+    }
+
+    function fetchSites() {
+      database.ref('sites').once('value', (snapshot) => {
+        const data = snapshot.val();
+        sites = data ? Object.values(data) : [];
+        renderCalendar(currentYear, currentMonth);
+      });
     }
 
     function renderCalendar(year, month) {
@@ -266,7 +304,7 @@
       renderCalendar(currentYear, currentMonth);
     }
 
-    renderCalendar(currentYear, currentMonth);
+    fetchSites();
   </script>
 </body>
 </html>
