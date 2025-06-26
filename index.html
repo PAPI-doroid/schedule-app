@@ -5,210 +5,217 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スケジュールアプリ</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
         .menu { background-color: #333; color: white; padding: 10px; display: flex; align-items: center; }
         .menu-icon { cursor: pointer; margin-right: 10px; }
-        .menu-links { display: none; flex-direction: column; background-color: #333; padding: 10px; }
-        .menu-links a { color: white; text-decoration: none; margin: 5px 0; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; }
-        table { border-collapse: collapse; width: max-content; min-width: 100%; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: center; min-width: 80px; }
-        .label-column { background-color: #f2f2f2; position: sticky; left: 0; z-index: 2; }
-        .fixed-cell { background-color: #f2f2f2; position: sticky; top: 0; left: 0; z-index: 3; }
-        .header-cell { background-color: #f2f2f2; position: sticky; top: 0; z-index: 2; }
+        .menu-content { display: none; background-color: #f9f9f9; padding: 10px; }
+        .menu-content a { display: block; margin: 5px 0; }
+        .header { display: flex; align-items: center; padding: 10px; }
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        th, td { border: 1px solid #000; text-align: center; min-width: 80px; word-wrap: break-word; }
+        th.fixed, td.fixed { position: sticky; left: 0; background: #f1f1f1; z-index: 2; }
+        th.fixed-top { position: sticky; top: 0; background: #f1f1f1; z-index: 3; }
         .saturday { color: blue; }
         .sunday { color: red; }
-        .scroll-container { overflow: auto; max-height: 80vh; }
-        .site-link { cursor: pointer; color: blue; text-decoration: underline; }
+        .site-name { color: blue; cursor: pointer; text-decoration: underline; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 5px; width: 300px; }
+        .scroll-container { overflow: auto; max-height: 500px; }
     </style>
 </head>
 <body>
-    <div class="menu">
-        <span class="menu-icon" onclick="toggleMenu()">≡</span>
-        <span>スケジュールアプリ</span>
-    </div>
-    <div class="menu-links" id="menuLinks">
-        <a href="#" onclick="changeView('schedule')">スケジュール表示</a>
-        <a href="#" onclick="changeView('register')">現場登録</a>
-        <a href="#" onclick="alert('従業員・車両配置登録（未実装）')">従業員・車両配置登録</a>
-        <a href="#" onclick="alert('従業員情報登録（未実装）')">従業員情報登録</a>
-        <a href="#" onclick="alert('車両情報登録（未実装）')">車両情報登録</a>
-    </div>
 
-    <div class="header">
-        <div>
-            拠点：
-            <select id="locationSelect" onchange="renderSchedule()">
-                <option value="本社">本社</option>
-                <option value="横浜">横浜</option>
-            </select>
+<div class="menu">
+    <div class="menu-icon" onclick="toggleMenu()">☰</div>
+    <div>スケジュールアプリ</div>
+</div>
+<div class="menu-content" id="menuContent">
+    <a href="#" onclick="showSchedule()">スケジュール表示</a>
+    <a href="#" onclick="showSiteRegister()">現場登録</a>
+    <a href="#">従業員・車両配置登録</a>
+    <a href="#">従業員情報登録</a>
+    <a href="#">車両情報登録</a>
+</div>
+
+<div class="header">
+    <label>拠点：
+        <select id="locationSelect" onchange="renderTable()">
+            <option value="本社">本社</option>
+            <option value="横浜">横浜</option>
+        </select>
+    </label>
+    <button onclick="changeMonth(-1)">前月</button>
+    <span id="currentMonth"></span>
+    <button onclick="changeMonth(1)">翌月</button>
+</div>
+
+<div id="siteRegister" style="display:none; padding:10px;">
+    <h3>現場登録</h3>
+    <label>現場名：<input type="text" id="siteName"></label><br><br>
+    <label>拠点：
+        <select id="siteLocation">
+            <option value="本社">本社</option>
+            <option value="横浜">横浜</option>
+        </select>
+    </label><br><br>
+    <label>工期開始：<input type="date" id="startDate"></label><br><br>
+    <label>工期終了：<input type="date" id="endDate"></label><br><br>
+    <button onclick="registerSite()">登録</button>
+</div>
+
+<div id="scheduleScreen" class="scroll-container"></div>
+
+<div class="modal" id="siteModal">
+    <div class="modal-content">
+        <h4 id="modalSiteName"></h4>
+        <button onclick="editSite()">編集</button>
+        <button onclick="confirmDelete()">削除</button>
+        <button onclick="closeModal()">閉じる</button>
+        <div id="editFields" style="display:none;">
+            <label>工期開始：<input type="date" id="editStartDate"></label><br><br>
+            <label>工期終了：<input type="date" id="editEndDate"></label><br><br>
+            <button onclick="saveEdit()">保存</button>
         </div>
-        <div>
-            <button onclick="changeMonth(-1)">前月</button>
-            <span id="currentMonth"></span>
-            <button onclick="changeMonth(1)">翌月</button>
+        <div id="deleteConfirm" style="display:none;">
+            <p>本当に削除しますか？</p>
+            <button onclick="deleteSite()">はい</button>
+            <button onclick="cancelDelete()">いいえ</button>
         </div>
     </div>
+</div>
 
-    <div id="content"></div>
+<script>
+let currentYear = 2025;
+let currentMonth = 6;
+let sites = JSON.parse(localStorage.getItem('sites')) || [];
+let selectedSite = null;
 
-    <script>
-        let year = 2025;
-        let month = 6;
-        let currentView = 'schedule';
+function toggleMenu() {
+    const menu = document.getElementById('menuContent');
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
 
-        let sites = [
-            { id: 1, name: '菅峯橋架付', location: '本社', start: '2025-06-01', end: '2025-06-30' },
-            { id: 2, name: '帯工事', location: '本社', start: '2025-06-01', end: '2025-06-30' }
-        ];
+function showSchedule() {
+    document.getElementById('scheduleScreen').style.display = 'block';
+    document.getElementById('siteRegister').style.display = 'none';
+    renderTable();
+}
 
-        function toggleMenu() {
-            const menu = document.getElementById('menuLinks');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-        }
+function showSiteRegister() {
+    document.getElementById('scheduleScreen').style.display = 'none';
+    document.getElementById('siteRegister').style.display = 'block';
+}
 
-        function changeMonth(diff) {
-            month += diff;
-            if (month < 1) { month = 12; year--; }
-            if (month > 12) { month = 1; year++; }
-            renderView();
-        }
+function changeMonth(change) {
+    currentMonth += change;
+    if (currentMonth === 0) { currentMonth = 12; currentYear--; }
+    if (currentMonth === 13) { currentMonth = 1; currentYear++; }
+    renderTable();
+}
 
-        function changeView(view) {
-            currentView = view;
-            document.getElementById('menuLinks').style.display = 'none';
-            renderView();
-        }
+function getDaysInMonth(year, month) {
+    return new Date(year, month, 0).getDate();
+}
 
-        function renderView() {
-            if (currentView === 'schedule') {
-                renderSchedule();
-            } else if (currentView === 'register') {
-                renderRegister();
+function registerSite() {
+    const name = document.getElementById('siteName').value;
+    const location = document.getElementById('siteLocation').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (name && startDate && endDate) {
+        sites.push({ name, location, startDate, endDate });
+        localStorage.setItem('sites', JSON.stringify(sites));
+        document.getElementById('siteName').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        renderTable();
+        showSchedule();
+    }
+}
+
+function renderTable() {
+    const scheduleScreen = document.getElementById('scheduleScreen');
+    const location = document.getElementById('locationSelect').value;
+    const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+
+    document.getElementById('currentMonth').innerText = `${currentYear}年${currentMonth}月`;
+
+    let table = '<table><thead><tr><th class="fixed fixed-top"></th>';
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth - 1, day);
+        const weekday = weekdays[date.getDay()];
+        const colorClass = weekday === '土' ? 'saturday' : weekday === '日' ? 'sunday' : '';
+        table += `<th class="fixed-top ${colorClass}">${day}日<br>(${weekday})</th>`;
+    }
+    table += '</tr></thead><tbody>';
+    table += '<tr><td class="fixed">空き状況</td>';
+    for (let i = 1; i <= daysInMonth; i++) { table += '<td></td>'; }
+    table += '</tr>';
+
+    sites.filter(site => site.location === location).forEach(site => {
+        table += `<tr><td class="fixed"><span class="site-name" onclick="openModal('${site.name}')">${site.name}</span></td>`;
+        for (let i = 1; i <= daysInMonth; i++) {
+            const cellDate = new Date(currentYear, currentMonth - 1, i).toISOString().split('T')[0];
+            if (cellDate >= site.startDate && cellDate <= site.endDate) {
+                table += '<td style="background-color: #ddd;"></td>';
+            } else {
+                table += '<td></td>';
             }
         }
+        table += '</tr>';
+    });
 
-        function renderSchedule() {
-            const location = document.getElementById('locationSelect').value;
-            const daysInMonth = new Date(year, month, 0).getDate();
-            const content = document.getElementById('content');
-            document.getElementById('currentMonth').innerText = `${year}年${month}月`;
+    table += '</tbody></table>';
+    scheduleScreen.innerHTML = table;
+}
 
-            let html = '<div class="scroll-container"><table><tr>';
-            html += '<th class="fixed-cell">空き状況</th>';
+function openModal(name) {
+    selectedSite = sites.find(site => site.name === name);
+    document.getElementById('modalSiteName').innerText = selectedSite.name;
+    document.getElementById('editFields').style.display = 'none';
+    document.getElementById('deleteConfirm').style.display = 'none';
+    document.getElementById('siteModal').style.display = 'flex';
+}
 
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month - 1, day);
-                const dayOfWeek = date.getDay();
-                let className = '';
-                if (dayOfWeek === 0) className = 'sunday';
-                if (dayOfWeek === 6) className = 'saturday';
-                html += `<th class="header-cell ${className}">${day}日<br>(${['日', '月', '火', '水', '木', '金', '土'][dayOfWeek]})</th>`;
-            }
-            html += '</tr>';
+function closeModal() {
+    document.getElementById('siteModal').style.display = 'none';
+}
 
-            html += '<tr><td class="label-column">空き状況</td>';
-            for (let day = 1; day <= daysInMonth; day++) { html += '<td></td>'; }
-            html += '</tr>';
+function editSite() {
+    document.getElementById('editStartDate').value = selectedSite.startDate;
+    document.getElementById('editEndDate').value = selectedSite.endDate;
+    document.getElementById('editFields').style.display = 'block';
+    document.getElementById('deleteConfirm').style.display = 'none';
+}
 
-            sites.filter(s => s.location === location).forEach(site => {
-                html += `<tr><td class="label-column"><span class="site-link" onclick="viewSite(${site.id})">${site.name}</span></td>`;
-                for (let day = 1; day <= daysInMonth; day++) {
-                    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                    const isOutOfPeriod = dateStr < site.start || dateStr > site.end;
-                    html += `<td style="background-color:${isOutOfPeriod ? '#ccc' : '#fff'}"></td>`;
-                }
-                html += '</tr>';
-            });
+function saveEdit() {
+    selectedSite.startDate = document.getElementById('editStartDate').value;
+    selectedSite.endDate = document.getElementById('editEndDate').value;
+    localStorage.setItem('sites', JSON.stringify(sites));
+    renderTable();
+    closeModal();
+}
 
-            html += '</table></div>';
-            content.innerHTML = html;
-        }
+function confirmDelete() {
+    document.getElementById('deleteConfirm').style.display = 'block';
+    document.getElementById('editFields').style.display = 'none';
+}
 
-        function renderRegister() {
-            const content = document.getElementById('content');
-            content.innerHTML = `
-                <h2>現場登録</h2>
-                <form onsubmit="addSite(event)">
-                    現場名: <input type="text" id="siteName" required><br>
-                    拠点: 
-                    <select id="siteLocation">
-                        <option value="本社">本社</option>
-                        <option value="横浜">横浜</option>
-                    </select><br>
-                    工期開始: <input type="date" id="startDate" required><br>
-                    工期終了: <input type="date" id="endDate" required><br>
-                    <button type="submit">登録</button>
-                </form>
-            `;
-        }
+function deleteSite() {
+    sites = sites.filter(site => site !== selectedSite);
+    localStorage.setItem('sites', JSON.stringify(sites));
+    renderTable();
+    closeModal();
+}
 
-        function addSite(event) {
-            event.preventDefault();
-            const name = document.getElementById('siteName').value;
-            const location = document.getElementById('siteLocation').value;
-            const start = document.getElementById('startDate').value;
-            const end = document.getElementById('endDate').value;
+function cancelDelete() {
+    document.getElementById('deleteConfirm').style.display = 'none';
+}
 
-            sites.push({ id: Date.now(), name, location, start, end });
-            alert('現場を登録しました');
-            renderView();
-        }
+window.onload = () => { renderTable(); };
+</script>
 
-        function viewSite(id) {
-            const site = sites.find(s => s.id === id);
-            const content = document.getElementById('content');
-            content.innerHTML = `
-                <h2>現場情報</h2>
-                <p>現場名: ${site.name}</p>
-                <p>拠点: ${site.location}</p>
-                <p>工期: ${site.start} ～ ${site.end}</p>
-                <button onclick="editSite(${id})">編集</button>
-                <button onclick="deleteSite(${id})">削除</button>
-                <button onclick="renderView()">戻る</button>
-            `;
-        }
-
-        function editSite(id) {
-            const site = sites.find(s => s.id === id);
-            const content = document.getElementById('content');
-            content.innerHTML = `
-                <h2>現場編集</h2>
-                <form onsubmit="updateSite(event, ${id})">
-                    現場名: <input type="text" id="editSiteName" value="${site.name}" required><br>
-                    拠点: 
-                    <select id="editSiteLocation">
-                        <option value="本社" ${site.location === '本社' ? 'selected' : ''}>本社</option>
-                        <option value="横浜" ${site.location === '横浜' ? 'selected' : ''}>横浜</option>
-                    </select><br>
-                    工期開始: <input type="date" id="editStartDate" value="${site.start}" required><br>
-                    工期終了: <input type="date" id="editEndDate" value="${site.end}" required><br>
-                    <button type="submit">更新</button>
-                    <button type="button" onclick="renderView()">キャンセル</button>
-                </form>
-            `;
-        }
-
-        function updateSite(event, id) {
-            event.preventDefault();
-            const site = sites.find(s => s.id === id);
-            site.name = document.getElementById('editSiteName').value;
-            site.location = document.getElementById('editSiteLocation').value;
-            site.start = document.getElementById('editStartDate').value;
-            site.end = document.getElementById('editEndDate').value;
-            alert('現場情報を更新しました');
-            renderView();
-        }
-
-        function deleteSite(id) {
-            if (confirm('本当に削除しますか？')) {
-                sites = sites.filter(s => s.id !== id);
-                alert('削除しました');
-                renderView();
-            }
-        }
-
-        renderSchedule();
-    </script>
 </body>
 </html>
