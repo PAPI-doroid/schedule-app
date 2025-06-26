@@ -62,17 +62,10 @@
       padding: 8px;
       gap: 10px;
     }
-    .location-selector {
-      padding: 0 8px;
-      margin-bottom: 8px;
-    }
-    .calendar-area, .site-area {
+    .calendar-area {
       flex: 1;
       overflow: auto;
-      display: none;
-    }
-    .calendar-area.show, .site-area.show {
-      display: block;
+      position: relative;
     }
     table {
       border-collapse: collapse;
@@ -84,21 +77,26 @@
       width: 100px;
       height: 40px;
       text-align: center;
+      background: #fff;
     }
     th.sticky-top {
       position: sticky;
       top: 0;
       background: #fff;
-      z-index: 2;
+      z-index: 3;
     }
     td.sticky-left {
       position: sticky;
       left: 0;
       background: #fff;
-      z-index: 1;
+      z-index: 2;
     }
     th.sticky-corner {
-      z-index: 3;
+      position: sticky;
+      top: 0;
+      left: 0;
+      background: #fff;
+      z-index: 4;
     }
     .sunday {
       color: red;
@@ -106,23 +104,9 @@
     .saturday {
       color: blue;
     }
-    .section-title {
-      padding: 10px;
-      background: #eee;
-      border-bottom: 1px solid #ccc;
-      font-weight: bold;
-    }
-    .form-group {
-      padding: 10px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 4px;
-    }
-    .form-group input, .form-group select {
-      width: 200px;
-      padding: 6px;
-      margin-bottom: 10px;
+    .location-selector {
+      padding: 0 8px;
+      margin-bottom: 8px;
     }
   </style>
 </head>
@@ -154,26 +138,8 @@
         </div>
       </div>
     </div>
-
-    <div class="calendar-area show" id="calendar-area">
+    <div class="calendar-area">
       <table id="calendar"></table>
-    </div>
-
-    <div class="site-area" id="site-area">
-      <div class="section-title">現場登録</div>
-      <div class="form-group">
-        <label>現場名</label>
-        <input type="text" />
-        <label>拠点</label>
-        <select>
-          <option>本社</option>
-          <option>横浜</option>
-        </select>
-        <label>工期（開始）</label>
-        <input type="date" />
-        <label>工期（終了）</label>
-        <input type="date" />
-      </div>
     </div>
   </div>
 
@@ -188,31 +154,20 @@
 
     function switchView(view) {
       document.getElementById("menu").classList.remove("show");
-      document.getElementById("calendar-area").classList.remove("show");
-      document.getElementById("site-area").classList.remove("show");
       document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
-
-      if (view === 'schedule') {
-        document.getElementById("calendar-area").classList.add("show");
-      } else if (view === 'site') {
-        document.getElementById("site-area").classList.add("show");
-      }
     }
 
     function renderCalendar(year, month) {
       const daysInMonth = new Date(year, month, 0).getDate();
-      const firstRow = [`<th class="sticky-top sticky-left sticky-corner"></th>`];
-      const secondRow = [`<td class="sticky-left">空き状況</td>`];
-
+      const firstRow = [`<th class="sticky-corner">空き状況</th>`];
       for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(year, month - 1, d);
         const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
         const className = date.getDay() === 0 ? "sunday" : date.getDay() === 6 ? "saturday" : "";
         firstRow.push(`<th class="sticky-top ${className}">${month}/${d}<br>(${weekday})</th>`);
-        secondRow.push(`<td></td>`);
       }
 
-      let rows = ["<tr>" + firstRow.join("") + "</tr>", "<tr>" + secondRow.join("") + "</tr>"];
+      let rows = ["<tr>" + firstRow.join("") + "</tr>"];
       for (let i = 1; i <= 40; i++) {
         let row = [`<td class="sticky-left">現場${i}</td>`];
         for (let d = 1; d <= daysInMonth; d++) row.push("<td></td>");
