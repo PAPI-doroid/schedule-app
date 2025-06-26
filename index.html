@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>スケジュール表示</title>
+  <title>スケジュールアプリ</title>
   <style>
     body {
       font-family: sans-serif;
@@ -130,21 +130,58 @@
       width: 200px;
     }
   </style>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-  <script>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+    import { getDatabase, ref, push, set, onValue } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+
     const firebaseConfig = {
       apiKey: "AIzaSyAdX0q9PyvSwxSzXS3nj7Rivz420tEpxU",
       authDomain: "schedule-app-faf39.firebaseapp.com",
-      databaseURL: "https://schedule-app-faf39-default-rtdb.firebaseio.com",
+      databaseURL: "https://schedule-app-faf39-default-rtdb.firebaseio.com/",
       projectId: "schedule-app-faf39",
       storageBucket: "schedule-app-faf39.appspot.com",
       messagingSenderId: "56363342875",
       appId: "1:56363342875:web:585c9a2a11f9874a58785e"
     };
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.db = db;
+    window.ref = ref;
+    window.push = push;
+    window.set = set;
+    window.onValue = onValue;
+
+    window.fetchSites = function() {
+      const siteRef = ref(db, 'sites');
+      onValue(siteRef, (snapshot) => {
+        const data = snapshot.val();
+        window.sites = data ? Object.values(data) : [];
+        renderCalendar(currentYear, currentMonth);
+      });
+    }
+
+    window.registerSite = function() {
+      const name = document.getElementById("site-name").value;
+      const location = document.getElementById("site-location").value;
+      const start = document.getElementById("site-start").value;
+      const end = document.getElementById("site-end").value;
+
+      if (name && start && end) {
+        const newSite = { name, location, start, end };
+        const newSiteRef = push(ref(db, 'sites'));
+        set(newSiteRef, newSite).then(() => {
+          alert('現場登録が完了しました');
+          fetchSites();
+          switchView('schedule');
+        });
+      } else {
+        alert('すべての項目を入力してください');
+      }
+    }
+
+    window.fetchSites();
   </script>
 </head>
 <body>
@@ -224,37 +261,6 @@
       }
     }
 
-    function registerSite() {
-      const name = document.getElementById("site-name").value;
-      const location = document.getElementById("site-location").value;
-      const start = document.getElementById("site-start").value;
-      const end = document.getElementById("site-end").value;
-
-      if (name && start && end) {
-        const newSite = { name, location, start, end };
-        const newSiteRef = database.ref('sites').push();
-        newSiteRef.set(newSite, (error) => {
-          if (error) {
-            alert('登録に失敗しました');
-          } else {
-            alert('現場登録が完了しました');
-            fetchSites();
-            switchView('schedule');
-          }
-        });
-      } else {
-        alert('すべての項目を入力してください');
-      }
-    }
-
-    function fetchSites() {
-      database.ref('sites').once('value', (snapshot) => {
-        const data = snapshot.val();
-        sites = data ? Object.values(data) : [];
-        renderCalendar(currentYear, currentMonth);
-      });
-    }
-
     function renderCalendar(year, month) {
       const daysInMonth = new Date(year, month, 0).getDate();
       const headerRow = [`<th class="sticky-corner"></th>`];
@@ -303,8 +309,6 @@
       }
       renderCalendar(currentYear, currentMonth);
     }
-
-    fetchSites();
   </script>
 </body>
 </html>
