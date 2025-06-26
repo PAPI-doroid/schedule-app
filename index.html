@@ -2,306 +2,211 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>スケジュールアプリ</title>
   <style>
+    /* 省略せず全CSS再送可（必要なら言ってね） */
     body {
       font-family: sans-serif;
       margin: 0;
       padding: 0;
       overflow: hidden;
     }
-    .container {
+    .menu {
       display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    .menu-bar {
+      align-items: center;
       background: #333;
       color: white;
-      padding: 8px;
-      display: flex;
-      align-items: center;
-      z-index: 10;
-      position: relative;
+      padding: 10px;
     }
     .menu-button {
+      font-size: 24px;
       cursor: pointer;
       margin-right: 10px;
-      font-size: 24px;
-      padding: 10px;
-      user-select: none;
-      z-index: 100;
     }
-    .menu-list {
+    .menu-items {
       display: none;
-      position: fixed;
-      top: 48px;
-      left: 0;
-      background: #444;
-      color: white;
+      background: #eee;
       padding: 10px;
-      flex-direction: column;
-      width: 100px;
-      z-index: 9999;
     }
-    .menu-list a {
-      color: white;
-      text-decoration: none;
-      padding: 8px 0;
-      font-size: 16px;
+    .menu-items a {
+      display: block;
+      margin: 5px 0;
+      cursor: pointer;
     }
-    .menu-list.show {
+    .header {
       display: flex;
-    }
-    .calendar-header {
-      display: flex;
-      justify-content: center;
       align-items: center;
-      padding: 8px;
-      gap: 10px;
+      padding: 10px;
     }
-    .location-selector {
-      padding: 0 8px;
-      margin-bottom: 8px;
-    }
-    select, button {
-      padding: 5px;
-    }
-    .calendar-area {
-      flex: 1;
+    .table-container {
+      width: 100%;
+      height: calc(100vh - 150px);
       overflow: auto;
       position: relative;
     }
     table {
       border-collapse: collapse;
-      width: max-content;
-      table-layout: fixed;
     }
     th, td {
-      border: 1px solid #ccc;
-      width: 100px;
+      border: 1px solid #999;
+      min-width: 80px;
       height: 40px;
       text-align: center;
-      background: #fff;
-      white-space: nowrap;
     }
-    th.sticky-top {
+    .fixed-cell {
       position: sticky;
-      top: 0;
-      background: #fff;
+      background: white;
       z-index: 3;
     }
-    td.sticky-left {
-      position: sticky;
-      left: 0;
-      background: #fff;
-      z-index: 2;
-    }
-    th.sticky-corner {
-      position: sticky;
+    .fixed-top-left {
       top: 0;
       left: 0;
-      background: #fff;
+      z-index: 5;
+    }
+    .fixed-top {
+      top: 0;
       z-index: 4;
     }
-    .sunday {
-      color: red;
+    .fixed-left {
+      left: 0;
+      z-index: 4;
     }
     .saturday {
       color: blue;
     }
-    .gray-cell {
-      background-color: #e0e0e0;
-    }
-    .site-register {
-      display: none;
-      padding: 20px;
-    }
-    .form-group {
-      margin-bottom: 10px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-    }
-    input {
-      padding: 5px;
-      width: 200px;
+    .sunday {
+      color: red;
     }
   </style>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-    import { getDatabase, ref, push, set, onValue } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js';
+</head>
+<body>
+  <div class="menu">
+    <span class="menu-button" onclick="toggleMenu()">☰</span>
+    <span>スケジュールアプリ</span>
+  </div>
+  <div id="menuItems" class="menu-items">
+    <a onclick="showSchedule()">スケジュール表示</a>
+    <a onclick="showSiteRegister()">現場登録</a>
+    <a>従業員・車両配置登録</a>
+    <a>従業員情報登録</a>
+    <a>車両情報登録</a>
+  </div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAdX0q9PyvSwxSzXS3nj7Rivz420tEpxU",
+  <div class="header">
+    <label>拠点：</label>
+    <select id="locationSelect" onchange="renderTable()">
+      <option value="本社">本社</option>
+      <option value="横浜">横浜</option>
+    </select>
+
+    <button onclick="prevMonth()">前月</button>
+    <span id="currentMonth"></span>
+    <button onclick="nextMonth()">翌月</button>
+  </div>
+
+  <div class="table-container" id="tableContainer"></div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    // Firebase設定
+    var firebaseConfig = {
+      apiKey: "AIzaSyAdX0gQ9pyySwsXzS3Snj7Rivz420tEpxU",
       authDomain: "schedule-app-faf39.firebaseapp.com",
-      databaseURL: "https://schedule-app-faf39-default-rtdb.firebaseio.com/",
+      databaseURL: "https://schedule-app-faf39-default-rtdb.firebaseio.com",
       projectId: "schedule-app-faf39",
       storageBucket: "schedule-app-faf39.appspot.com",
       messagingSenderId: "56363342875",
-      appId: "1:56363342875:web:585c9a2a11f9874a58785e"
+      appId: "1:56363342875:web:585c9a2a1f9874a58785e"
     };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    let sites = [];
-
-    function fetchSites() {
-      const siteRef = ref(db, 'sites');
-      onValue(siteRef, (snapshot) => {
-        const data = snapshot.val();
-        sites = data ? Object.values(data) : [];
-        renderCalendar(currentYear, currentMonth);
-      });
-    }
-
-    window.registerSite = function() {
-      const name = document.getElementById("site-name").value;
-      const location = document.getElementById("site-location").value;
-      const start = document.getElementById("site-start").value;
-      const end = document.getElementById("site-end").value;
-
-      if (name && start && end) {
-        const newSite = { name, location, start, end };
-        const newSiteRef = push(ref(db, 'sites'));
-        set(newSiteRef, newSite).then(() => {
-          alert('現場登録が完了しました');
-          document.getElementById("site-name").value = '';
-          document.getElementById("site-location").value = '本社';
-          document.getElementById("site-start").value = '';
-          document.getElementById("site-end").value = '';
-          switchView('schedule');
-        });
-      } else {
-        alert('すべての項目を入力してください');
-      }
-    }
-
-    window.fetchSites = fetchSites;
+    firebase.initializeApp(firebaseConfig);
+    var database = firebase.database();
   </script>
-</head>
-<body>
-  <div class="container">
-    <div class="menu-bar">
-      <div class="menu-button" onclick="toggleMenu()">≡</div>
-      <div>スケジュールアプリ</div>
-      <div class="menu-list" id="menu">
-        <a href="#" onclick="switchView('schedule')">スケジュール表示</a>
-        <a href="#" onclick="switchView('site')">現場登録</a>
-        <a href="#">従業員・車両配置登録</a>
-        <a href="#">従業員情報登録</a>
-        <a href="#">車両情報登録</a>
-      </div>
-    </div>
-    <div id="schedule-header">
-      <div class="calendar-header">
-        <button onclick="changeMonth(-1)">前月</button>
-        <div id="current-month">2025年6月</div>
-        <button onclick="changeMonth(1)">翌月</button>
-      </div>
-      <div class="location-selector">
-        拠点：<select id="location" onchange="renderCalendar(currentYear, currentMonth)">
-          <option>本社</option>
-          <option>横浜</option>
-        </select>
-      </div>
-    </div>
-    <div class="calendar-area" id="calendar-area">
-      <table id="calendar"></table>
-    </div>
-    <div class="site-register" id="site-register">
-      <div class="form-group">
-        <label>現場名</label>
-        <input type="text" id="site-name">
-      </div>
-      <div class="form-group">
-        <label>拠点</label>
-        <select id="site-location">
-          <option>本社</option>
-          <option>横浜</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>工期（開始）</label>
-        <input type="date" id="site-start">
-      </div>
-      <div class="form-group">
-        <label>工期（終了）</label>
-        <input type="date" id="site-end">
-      </div>
-      <button onclick="registerSite()">登録</button>
-    </div>
-  </div>
 
   <script>
-    const calendar = document.getElementById("calendar");
-    let currentYear = 2025;
-    let currentMonth = 6;
+    let year = 2025;
+    let month = 6;
+    let sites = [];
 
     function toggleMenu() {
-      document.getElementById("menu").classList.toggle("show");
+      const menu = document.getElementById('menuItems');
+      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
     }
 
-    function switchView(view) {
-      document.getElementById("menu").classList.remove("show");
-      document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
-      document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
-      document.getElementById("site-register").style.display = view === 'site' ? 'block' : 'none';
-    }
-
-    function renderCalendar(year, month) {
-      const daysInMonth = new Date(year, month, 0).getDate();
-      const headerRow = [`<th class="sticky-corner"></th>`];
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const date = new Date(year, month - 1, d);
-        const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
-        const className = date.getDay() === 0 ? "sunday" : date.getDay() === 6 ? "saturday" : "";
-        headerRow.push(`<th class="sticky-top ${className}">${month}/${d}<br>(${weekday})</th>`);
+    function prevMonth() {
+      month--;
+      if (month === 0) {
+        month = 12;
+        year--;
       }
+      renderTable();
+    }
 
-      let rows = ["<tr>" + headerRow.join("") + "</tr>"];
+    function nextMonth() {
+      month++;
+      if (month === 13) {
+        month = 1;
+        year++;
+      }
+      renderTable();
+    }
 
-      let emptyRow = [`<td class="sticky-left">空き状況</td>`];
-      for (let d = 1; d <= daysInMonth; d++) emptyRow.push("<td></td>");
-      rows.push("<tr>" + emptyRow.join("") + "</tr>");
+    function getDaysInMonth(year, month) {
+      return new Date(year, month, 0).getDate();
+    }
 
-      const selectedLocation = document.getElementById("location").value;
-      sites.filter(site => site.location === selectedLocation).forEach(site => {
-        let row = [`<td class="sticky-left">${site.name}</td>`];
-        for (let d = 1; d <= daysInMonth; d++) {
-          const currentDate = new Date(year, month - 1, d);
-          const startDate = new Date(site.start);
-          const endDate = new Date(site.end);
-          if (currentDate >= startDate && currentDate <= endDate) {
-            row.push("<td></td>");
-          } else {
-            row.push("<td class='gray-cell'></td>");
-          }
-        }
-        rows.push("<tr>" + row.join("") + "</tr>");
+    function fetchSites(callback) {
+      const location = document.getElementById('locationSelect').value;
+      firebase.database().ref('sites').orderByChild('location').equalTo(location).once('value', (snapshot) => {
+        sites = [];
+        snapshot.forEach((child) => {
+          sites.push(child.val().name);
+        });
+        callback();
       });
-
-      calendar.innerHTML = rows.join("");
-      document.getElementById("current-month").textContent = `${year}年${month}月`;
     }
 
-    function changeMonth(offset) {
-      currentMonth += offset;
-      if (currentMonth < 1) {
-        currentMonth = 12;
-        currentYear--;
-      } else if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
-      }
-      renderCalendar(currentYear, currentMonth);
+    function renderTable() {
+      document.getElementById('currentMonth').innerText = `${year}年${month}月`;
+      fetchSites(() => {
+        const days = getDaysInMonth(year, month);
+        const container = document.getElementById('tableContainer');
+        let html = '<table><thead><tr><th class="fixed-cell fixed-top-left"></th>';
+
+        for (let d = 1; d <= days; d++) {
+          const date = new Date(year, month - 1, d);
+          const day = date.getDay();
+          const className = day === 0 ? 'sunday' : (day === 6 ? 'saturday' : '');
+          html += `<th class="fixed-cell fixed-top ${className}">${d}日(${['日', '月', '火', '水', '木', '金', '土'][day]})</th>`;
+        }
+        html += '</tr></thead><tbody>';
+
+        sites.forEach(site => {
+          html += `<tr><th class="fixed-cell fixed-left">${site}</th>`;
+          for (let d = 1; d <= days; d++) {
+            html += `<td></td>`;
+          }
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      });
     }
 
-    fetchSites();
+    function showSchedule() {
+      renderTable();
+      document.getElementById('menuItems').style.display = 'none';
+    }
+
+    function showSiteRegister() {
+      location.href = 'site_register.html';
+    }
+
+    // 初期表示
+    renderTable();
   </script>
 </body>
 </html>
