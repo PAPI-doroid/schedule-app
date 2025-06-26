@@ -112,11 +112,13 @@
     <table id="scheduleTable">
         <thead>
             <tr id="dateRow">
-                <th class="fixed-header">空き状況</th>
+                <th class="fixed-header"></th> <!-- 1列1行目は空白 -->
             </tr>
         </thead>
         <tbody id="scheduleBody">
-            <!-- 現場データが入る -->
+            <tr>
+                <td class="fixed-header">空き状況</td> <!-- 1列2行目 -->
+            </tr>
         </tbody>
     </table>
 </div>
@@ -142,8 +144,12 @@
     ];
 
     function renderTable() {
-        dateRow.innerHTML = '<th class="fixed-header">空き状況</th>';
+        dateRow.innerHTML = '<th class="fixed-header"></th>';
         scheduleBody.innerHTML = '';
+
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `<td class="fixed-header">空き状況</td>`; // 1列2行目
+        scheduleBody.appendChild(emptyRow);
 
         currentMonth.innerText = `${year}年${month}月`;
 
