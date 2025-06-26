@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>スケジュール表示</title>
   <style>
     body {
@@ -19,36 +19,37 @@
     .menu-bar {
       background: #333;
       color: white;
-      padding: 8px;
+      padding: 16px;
       display: flex;
       align-items: center;
       z-index: 10;
-      position: static;
+      position: relative;
     }
     .menu-button {
       cursor: pointer;
       margin-right: 10px;
-      font-size: 24px;
-      padding: 10px;
+      font-size: 32px;
+      padding: 16px;
       user-select: none;
       z-index: 100;
     }
     .menu-list {
       display: none;
       position: fixed;
-      top: 48px;
+      top: 64px;
       left: 0;
       background: #444;
       color: white;
       padding: 10px;
       flex-direction: column;
-      width: 120px;
+      width: 150px;
       z-index: 9999;
     }
     .menu-list a {
       color: white;
       text-decoration: none;
-      padding: 5px 0;
+      padding: 8px 0;
+      font-size: 18px;
     }
     .menu-list.show {
       display: flex;
