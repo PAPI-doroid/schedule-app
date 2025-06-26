@@ -80,5 +80,149 @@
     // 現場クリック → 現場詳細表示 → 編集・削除機能 → 確認ダイアログまでの処理を追加します
     // 完成版のJavaScriptコードはまとめて別途送ります
   </script>
+  <script>
+let scheduleData = [];
+let selectedYear = 2025;
+let selectedMonth = 6;
+let selectedLocation = "本社";
+let selectedSite = null;
+
+function toggleMenu() {
+  const menu = document.getElementById('menu');
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function changeView(view) {
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('scheduleView').style.display = (view === 'schedule') ? 'block' : 'none';
+  document.getElementById('siteView').style.display = (view === 'site') ? 'block' : 'none';
+  document.getElementById('siteDetailView').style.display = 'none';
+  document.getElementById('confirmDelete').style.display = 'none';
+  if (view === 'schedule') renderSchedule();
+}
+
+function changeMonth(delta) {
+  selectedMonth += delta;
+  if (selectedMonth === 0) {
+    selectedMonth = 12;
+    selectedYear--;
+  } else if (selectedMonth === 13) {
+    selectedMonth = 1;
+    selectedYear++;
+  }
+  renderSchedule();
+}
+
+function getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate();
+}
+
+function renderSchedule() {
+  selectedLocation = document.getElementById('locationSelect').value;
+  document.getElementById('currentMonth').textContent = `${selectedYear}年${selectedMonth}月`;
+
+  const dateRow = document.getElementById('dateRow');
+  const statusRow = document.getElementById('statusRow');
+  dateRow.innerHTML = '<th></th>';
+  statusRow.innerHTML = '<th>空き状況</th>';
+
+  const days = getDaysInMonth(selectedYear, selectedMonth);
+  for (let i = 1; i <= days; i++) {
+    const date = new Date(selectedYear, selectedMonth - 1, i);
+    const weekday = date.getDay();
+    let color = '';
+    if (weekday === 0) color = 'red';
+    else if (weekday === 6) color = 'blue';
+
+    dateRow.innerHTML += `<th style="color:${color}">${i}日(${['日','月','火','水','木','金','土'][weekday]})</th>`;
+    statusRow.innerHTML += '<td></td>';
+  }
+
+  const body = document.getElementById('scheduleBody');
+  body.innerHTML = '';
+  scheduleData.forEach((site, index) => {
+    if (site.location === selectedLocation) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.innerHTML = `<a href="#" onclick="viewSiteDetail(${index})">${site.name}</a>`;
+      tr.appendChild(td);
+
+      for (let i = 1; i <= days; i++) {
+        const cellDate = new Date(selectedYear, selectedMonth - 1, i);
+        if (cellDate < new Date(site.start) || cellDate > new Date(site.end)) {
+          tr.innerHTML += `<td style="background-color: lightgray;"></td>`;
+        } else {
+          tr.innerHTML += '<td></td>';
+        }
+      }
+      body.appendChild(tr);
+    }
+  });
+}
+
+function addSite() {
+  const name = document.getElementById('siteName').value;
+  const location = document.getElementById('siteLocation').value;
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+
+  scheduleData.push({ name, location, start, end });
+  document.getElementById('siteForm').reset();
+  changeView('schedule');
+}
+
+function viewSiteDetail(index) {
+  selectedSite = index;
+  const site = scheduleData[index];
+
+  document.getElementById('detailName').textContent = `現場名：${site.name}`;
+  document.getElementById('detailLocation').textContent = `拠点：${site.location}`;
+  document.getElementById('detailStart').textContent = `工期開始：${site.start}`;
+  document.getElementById('detailEnd').textContent = `工期終了：${site.end}`;
+
+  document.getElementById('scheduleView').style.display = 'none';
+  document.getElementById('siteView').style.display = 'none';
+  document.getElementById('siteDetailView').style.display = 'block';
+  document.getElementById('confirmDelete').style.display = 'none';
+}
+
+function backToSchedule() {
+  document.getElementById('siteDetailView').style.display = 'none';
+  changeView('schedule');
+}
+
+function editSite() {
+  const site = scheduleData[selectedSite];
+  document.getElementById('siteName').value = site.name;
+  document.getElementById('siteLocation').value = site.location;
+  document.getElementById('startDate').value = site.start;
+  document.getElementById('endDate').value = site.end;
+
+  scheduleData.splice(selectedSite, 1);
+  selectedSite = null;
+
+  changeView('site');
+}
+
+function confirmDeleteSite() {
+  document.getElementById('confirmDelete').style.display = 'block';
+}
+
+function deleteSite() {
+  scheduleData.splice(selectedSite, 1);
+  selectedSite = null;
+  document.getElementById('confirmDelete').style.display = 'none';
+  changeView('schedule');
+}
+
+function cancelDelete() {
+  document.getElementById('confirmDelete').style.display = 'none';
+}
+
+window.onload = function() {
+  renderSchedule();
+};
+</script>
+
 </body>
 </html>
