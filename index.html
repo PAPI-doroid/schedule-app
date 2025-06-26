@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>スケジュール表示</title>
   <style>
     body {
@@ -15,12 +15,6 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-    }
-    .header {
-      display: flex;
-      flex-direction: column;
-      background: #f0f0f0;
-      border-bottom: 1px solid #ccc;
     }
     .menu-bar {
       background: #333;
@@ -62,6 +56,10 @@
       padding: 8px;
       gap: 10px;
     }
+    .location-selector {
+      padding: 0 8px;
+      margin-bottom: 8px;
+    }
     .calendar-area {
       flex: 1;
       overflow: auto;
@@ -78,6 +76,7 @@
       height: 40px;
       text-align: center;
       background: #fff;
+      white-space: nowrap;
     }
     th.sticky-top {
       position: sticky;
@@ -104,41 +103,35 @@
     .saturday {
       color: blue;
     }
-    .location-selector {
-      padding: 0 8px;
-      margin-bottom: 8px;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <div class="menu-bar">
-        <div class="menu-button" onclick="toggleMenu()">≡</div>
-        <div>スケジュールアプリ</div>
-        <div class="menu-list" id="menu">
-          <a href="#" onclick="switchView('schedule')">スケジュール表示</a>
-          <a href="#" onclick="switchView('site')">現場登録</a>
-          <a href="#">従業員・車両配置登録</a>
-          <a href="#">従業員情報登録</a>
-          <a href="#">車両情報登録</a>
-        </div>
-      </div>
-      <div id="schedule-header">
-        <div class="calendar-header">
-          <button onclick="changeMonth(-1)">前月</button>
-          <div id="current-month">2025年6月</div>
-          <button onclick="changeMonth(1)">翌月</button>
-        </div>
-        <div class="location-selector">
-          拠点：<select id="location">
-            <option>本社</option>
-            <option>横浜</option>
-          </select>
-        </div>
+    <div class="menu-bar">
+      <div class="menu-button" onclick="toggleMenu()">≡</div>
+      <div>スケジュールアプリ</div>
+      <div class="menu-list" id="menu">
+        <a href="#" onclick="switchView('schedule')">スケジュール表示</a>
+        <a href="#" onclick="switchView('site')">現場登録</a>
+        <a href="#">従業員・車両配置登録</a>
+        <a href="#">従業員情報登録</a>
+        <a href="#">車両情報登録</a>
       </div>
     </div>
-    <div class="calendar-area">
+    <div id="schedule-header">
+      <div class="calendar-header">
+        <button onclick="changeMonth(-1)">前月</button>
+        <div id="current-month">2025年6月</div>
+        <button onclick="changeMonth(1)">翌月</button>
+      </div>
+      <div class="location-selector">
+        拠点：<select id="location">
+          <option>本社</option>
+          <option>横浜</option>
+        </select>
+      </div>
+    </div>
+    <div class="calendar-area" id="calendar-area">
       <table id="calendar"></table>
     </div>
   </div>
@@ -154,20 +147,27 @@
 
     function switchView(view) {
       document.getElementById("menu").classList.remove("show");
+      document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
     }
 
     function renderCalendar(year, month) {
       const daysInMonth = new Date(year, month, 0).getDate();
-      const firstRow = [`<th class="sticky-corner">空き状況</th>`];
+      const headerRow = [`<th class="sticky-corner"></th>`];
+
       for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(year, month - 1, d);
         const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
         const className = date.getDay() === 0 ? "sunday" : date.getDay() === 6 ? "saturday" : "";
-        firstRow.push(`<th class="sticky-top ${className}">${month}/${d}<br>(${weekday})</th>`);
+        headerRow.push(`<th class="sticky-top ${className}">${month}/${d}<br>(${weekday})</th>`);
       }
 
-      let rows = ["<tr>" + firstRow.join("") + "</tr>"];
+      let rows = ["<tr>" + headerRow.join("") + "</tr>"];
+
+      let emptyRow = [`<td class="sticky-left">空き状況</td>`];
+      for (let d = 1; d <= daysInMonth; d++) emptyRow.push("<td></td>");
+      rows.push("<tr>" + emptyRow.join("") + "</tr>");
+
       for (let i = 1; i <= 40; i++) {
         let row = [`<td class="sticky-left">現場${i}</td>`];
         for (let d = 1; d <= daysInMonth; d++) row.push("<td></td>");
