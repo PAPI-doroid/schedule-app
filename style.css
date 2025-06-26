@@ -1,78 +1,92 @@
 body {
   font-family: sans-serif;
   margin: 0;
+}
+
+header {
+  background: #333;
+  color: #fff;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+}
+
+#menu-toggle {
+  font-size: 20px;
+  margin-right: 10px;
+}
+
+nav {
+  background: #f0f0f0;
+  position: absolute;
+  width: 200px;
+  top: 50px;
+  left: 0;
+  z-index: 1000;
+}
+
+nav ul {
+  list-style: none;
+  margin: 0;
   padding: 0;
-  background: #f8f8f8;
 }
 
-.schedule-container {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  grid-template-rows: 40px 1fr;
-  height: 100vh;
+nav li {
+  padding: 10px;
+  cursor: pointer;
 }
 
-.header-corner {
+nav li:hover {
   background: #ddd;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid #aaa;
-  font-weight: bold;
 }
 
-.header-scroll {
-  overflow-x: scroll;
-  background: #eee;
+.hidden {
+  display: none;
 }
 
-.body-fixed {
-  overflow-y: scroll;
-  background: #f9f9f9;
+table {
+  border-collapse: collapse;
 }
 
-.body-scroll {
-  overflow: scroll;
+th,
+td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
 }
 
-#date-row {
-  display: flex;
-  width: fit-content;
+.fixed {
+  position: sticky;
+  background: white;
+  z-index: 10;
 }
 
-#site-column {
-  display: flex;
-  flex-direction: column;
-  height: fit-content;
+.fixed-top-left {
+  position: sticky;
+  left: 0;
+  top: 0;
 }
 
-#grid-body {
-  display: flex;
-  flex-direction: column;
-  width: fit-content;
+.fixed-left {
+  position: sticky;
+  left: 0;
 }
 
-.row {
-  display: flex;
+.fixed-top {
+  position: sticky;
+  top: 0;
 }
 
-.cell {
-  width: 80px;
-  height: 40px;
-  border: 1px solid #ccc;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #fff;
-  white-space: nowrap;
+#content {
+  overflow: auto;
+  width: 100%;
+  height: calc(100vh - 50px);
 }
 
-.cell.header {
-  background: #f0f0f0;
-  font-weight: bold;
+input, select {
+  margin: 5px;
 }
 
-.cell.site {
-  background: #f0f0f0;
-  font-weight: bold;
+button {
+  margin: 5px;
 }
