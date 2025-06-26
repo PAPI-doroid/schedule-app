@@ -111,6 +111,9 @@
     .saturday {
       color: blue;
     }
+    .gray-cell {
+      background-color: #e0e0e0;
+    }
     .site-register {
       display: none;
       padding: 20px;
@@ -148,7 +151,7 @@
         <button onclick="changeMonth(1)">翌月</button>
       </div>
       <div class="location-selector">
-        拠点：<select id="location">
+        拠点：<select id="location" onchange="renderCalendar(currentYear, currentMonth)">
           <option>本社</option>
           <option>横浜</option>
         </select>
@@ -177,7 +180,7 @@
         <label>工期（終了）</label>
         <input type="date" id="site-end">
       </div>
-      <button onclick="alert('現場登録が完了しました')">登録</button>
+      <button onclick="registerSite()">登録</button>
     </div>
   </div>
 
@@ -185,6 +188,7 @@
     const calendar = document.getElementById("calendar");
     let currentYear = 2025;
     let currentMonth = 6;
+    let sites = [];
 
     function toggleMenu() {
       document.getElementById("menu").classList.toggle("show");
@@ -195,6 +199,22 @@
       document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("site-register").style.display = view === 'site' ? 'block' : 'none';
+    }
+
+    function registerSite() {
+      const name = document.getElementById("site-name").value;
+      const location = document.getElementById("site-location").value;
+      const start = document.getElementById("site-start").value;
+      const end = document.getElementById("site-end").value;
+
+      if (name && start && end) {
+        sites.push({ name, location, start, end });
+        alert('現場登録が完了しました');
+        renderCalendar(currentYear, currentMonth);
+        switchView('schedule');
+      } else {
+        alert('すべての項目を入力してください');
+      }
     }
 
     function renderCalendar(year, month) {
@@ -214,11 +234,21 @@
       for (let d = 1; d <= daysInMonth; d++) emptyRow.push("<td></td>");
       rows.push("<tr>" + emptyRow.join("") + "</tr>");
 
-      for (let i = 1; i <= 40; i++) {
-        let row = [`<td class="sticky-left">現場${i}</td>`];
-        for (let d = 1; d <= daysInMonth; d++) row.push("<td></td>");
+      const selectedLocation = document.getElementById("location").value;
+      sites.filter(site => site.location === selectedLocation).forEach(site => {
+        let row = [`<td class="sticky-left">${site.name}</td>`];
+        for (let d = 1; d <= daysInMonth; d++) {
+          const currentDate = new Date(year, month - 1, d);
+          const startDate = new Date(site.start);
+          const endDate = new Date(site.end);
+          if (currentDate >= startDate && currentDate <= endDate) {
+            row.push("<td></td>");
+          } else {
+            row.push("<td class='gray-cell'></td>");
+          }
+        }
         rows.push("<tr>" + row.join("") + "</tr>");
-      }
+      });
 
       calendar.innerHTML = rows.join("");
       document.getElementById("current-month").textContent = `${year}年${month}月`;
