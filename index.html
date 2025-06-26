@@ -108,6 +108,21 @@
     .saturday {
       color: blue;
     }
+    .site-register {
+      display: none;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input, select, button {
+      padding: 5px;
+      width: 200px;
+    }
   </style>
 </head>
 <body>
@@ -139,6 +154,28 @@
     <div class="calendar-area" id="calendar-area">
       <table id="calendar"></table>
     </div>
+    <div class="site-register" id="site-register">
+      <div class="form-group">
+        <label>現場名</label>
+        <input type="text" id="site-name">
+      </div>
+      <div class="form-group">
+        <label>拠点</label>
+        <select id="site-location">
+          <option>本社</option>
+          <option>横浜</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>工期（開始）</label>
+        <input type="date" id="site-start">
+      </div>
+      <div class="form-group">
+        <label>工期（終了）</label>
+        <input type="date" id="site-end">
+      </div>
+      <button onclick="alert('現場登録が完了しました')">登録</button>
+    </div>
   </div>
 
   <script>
@@ -154,6 +191,7 @@
       document.getElementById("menu").classList.remove("show");
       document.getElementById("calendar-area").style.display = view === 'schedule' ? 'block' : 'none';
       document.getElementById("schedule-header").style.display = view === 'schedule' ? 'block' : 'none';
+      document.getElementById("site-register").style.display = view === 'site' ? 'block' : 'none';
     }
 
     function renderCalendar(year, month) {
