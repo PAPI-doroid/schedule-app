@@ -116,9 +116,7 @@
             </tr>
         </thead>
         <tbody id="scheduleBody">
-            <tr>
-                <td class="fixed-header">空き状況</td> <!-- 1列2行目 -->
-            </tr>
+            <!-- セルはJavaScriptで描画 -->
         </tbody>
     </table>
 </div>
@@ -130,7 +128,6 @@
         sidebar.classList.toggle('active');
     }
 
-    const scheduleTable = document.getElementById('scheduleTable');
     const scheduleBody = document.getElementById('scheduleBody');
     const dateRow = document.getElementById('dateRow');
     const currentMonth = document.getElementById('currentMonth');
@@ -147,10 +144,6 @@
         dateRow.innerHTML = '<th class="fixed-header"></th>';
         scheduleBody.innerHTML = '';
 
-        const emptyRow = document.createElement('tr');
-        emptyRow.innerHTML = `<td class="fixed-header">空き状況</td>`; // 1列2行目
-        scheduleBody.appendChild(emptyRow);
-
         currentMonth.innerText = `${year}年${month}月`;
 
         const lastDate = new Date(year, month, 0).getDate();
@@ -164,6 +157,21 @@
             dateRow.innerHTML += `<th class="fixed-header" style="color:${color}">${day}日(${dayName})</th>`;
         }
 
+        // 空き状況行を作成
+        const emptyRow = document.createElement('tr');
+        const labelCell = document.createElement('td');
+        labelCell.classList.add('fixed-header');
+        labelCell.textContent = '空き状況';
+        emptyRow.appendChild(labelCell);
+
+        for (let day = 1; day <= lastDate; day++) {
+            const cell = document.createElement('td');
+            emptyRow.appendChild(cell);
+        }
+
+        scheduleBody.appendChild(emptyRow);
+
+        // 現場データを描画
         sites.forEach(site => {
             const row = document.createElement('tr');
             const nameCell = document.createElement('td');
