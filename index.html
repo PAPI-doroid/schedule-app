@@ -6,177 +6,158 @@
     <title>スケジュールアプリ</title>
     <style>
         body {
-            margin: 0;
             font-family: Arial, sans-serif;
-            overflow: hidden;
+            margin: 0;
         }
-
-        .menu-bar {
+        .top-bar {
             background-color: #333;
             color: white;
             padding: 10px;
             display: flex;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
         }
-
-        .menu-bar .menu-icon {
-            font-size: 24px;
+        .top-bar button {
             margin-right: 10px;
         }
-
-        .top-controls {
-            background-color: #f4f4f4;
+        .menu {
             padding: 10px;
+        }
+        .menu a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: blue;
+        }
+        .controls {
+            padding: 10px;
+            background-color: #f5f5f5;
             position: sticky;
-            top: 40px;
-            z-index: 999;
+            top: 0;
+            z-index: 100;
             display: flex;
             align-items: center;
-            gap: 10px;
         }
-
         .schedule-container {
             overflow: auto;
             width: 100%;
-            height: calc(100vh - 100px);
         }
-
         table {
             border-collapse: collapse;
-            min-width: 1500px;
+            min-width: 800px;
+            width: max-content;
         }
-
         th, td {
-            border: 1px solid #000;
+            border: 1px solid black;
             padding: 8px;
             text-align: center;
             min-width: 80px;
-            white-space: nowrap;
         }
-
-        th:first-child, td:first-child {
+        th.sticky, td.sticky {
             position: sticky;
             left: 0;
-            background-color: #f0f0f0;
-            z-index: 998;
+            background-color: white;
+            z-index: 50;
         }
-
-        .header th {
+        th.header-sticky {
             position: sticky;
-            top: 80px;
-            background-color: #fff;
-            z-index: 997;
+            top: 40px;
+            background-color: white;
+            z-index: 75;
         }
-
-        .header th:first-child {
-            z-index: 999;
-        }
-
-        .day-sunday {
+        .sunday {
             color: red;
         }
-
-        .day-saturday {
+        .saturday {
             color: blue;
+        }
+        @media (max-width: 768px) {
+            .schedule-container {
+                overflow-x: scroll;
+            }
+            table {
+                min-width: 600px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div class="menu-bar">
-        <span class="menu-icon">≡</span> スケジュールアプリ
-    </div>
+<div class="top-bar">
+    <span style="margin-right: 10px;">≡</span>
+    <span>スケジュールアプリ</span>
+</div>
 
-    <div class="top-controls">
-        <label for="location">拠点：</label>
-        <select id="location">
-            <option value="本社">本社</option>
-            <option value="横浜">横浜</option>
-        </select>
-        <button onclick="changeMonth(-1)">前月</button>
-        <span id="yearMonth">2025年6月</span>
-        <button onclick="changeMonth(1)">翌月</button>
-    </div>
+<div class="menu">
+    <a href="#">スケジュール表示</a>
+    <a href="#">現場登録</a>
+    <a href="#">従業員・車両配置登録</a>
+    <a href="#">従業員情報登録</a>
+    <a href="#">車両情報登録</a>
+</div>
 
-    <div class="schedule-container" id="scheduleContainer">
-        <table>
-            <thead class="header">
-                <tr>
-                    <th></th>
-                    <th class="day-sunday">1日(日)</th>
-                    <th>2日(月)</th>
-                    <th>3日(火)</th>
-                    <th>4日(水)</th>
-                    <th>5日(木)</th>
-                    <th>6日(金)</th>
-                    <th class="day-saturday">7日(土)</th>
-                    <th class="day-sunday">8日(日)</th>
-                    <th>9日(月)</th>
-                    <th>10日(火)</th>
-                    <th>11日(水)</th>
-                    <th>12日(木)</th>
-                    <th>13日(金)</th>
-                    <th class="day-saturday">14日(土)</th>
-                    <th class="day-sunday">15日(日)</th>
-                    <th>16日(月)</th>
-                    <th>17日(火)</th>
-                    <th>18日(水)</th>
-                    <th>19日(木)</th>
-                    <th>20日(金)</th>
-                    <th class="day-saturday">21日(土)</th>
-                    <th class="day-sunday">22日(日)</th>
-                    <th>23日(月)</th>
-                    <th>24日(火)</th>
-                    <th>25日(水)</th>
-                    <th>26日(木)</th>
-                    <th>27日(金)</th>
-                    <th class="day-saturday">28日(土)</th>
-                    <th class="day-sunday">29日(日)</th>
-                    <th>30日(月)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>空き状況</th>
-                    <td colspan="30"></td>
-                </tr>
-                <tr>
-                    <th><a href="#">菅峯橋架付</a></th>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    <td></td><td></td><td></td><td></td><td></td>
-                </tr>
-                <tr>
-                    <th><a href="#">帯工事</a></th>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-                    <td></td><td></td><td></td><td></td><td></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<div class="controls">
+    <label for="location">拠点：</label>
+    <select id="location">
+        <option value="本社">本社</option>
+        <option value="横浜">横浜</option>
+    </select>
+    <button id="prevMonth">前月</button>
+    <span id="currentMonth" style="margin: 0 10px;">2025年6月</span>
+    <button id="nextMonth">翌月</button>
+</div>
 
-    <script>
-        let currentMonth = 6;
-        let currentYear = 2025;
+<div class="schedule-container">
+    <table>
+        <thead>
+            <tr>
+                <th class="sticky"></th>
+                <th class="header-sticky sunday">1日(日)</th>
+                <th class="header-sticky">2日(月)</th>
+                <th class="header-sticky">3日(火)</th>
+                <th class="header-sticky">4日(水)</th>
+                <th class="header-sticky">5日(木)</th>
+                <th class="header-sticky">6日(金)</th>
+                <th class="header-sticky saturday">7日(土)</th>
+                <th class="header-sticky sunday">8日(日)</th>
+                <th class="header-sticky">9日(月)</th>
+                <th class="header-sticky">10日(火)</th>
+                <th class="header-sticky">11日(水)</th>
+                <th class="header-sticky">12日(木)</th>
+                <th class="header-sticky">13日(金)</th>
+                <th class="header-sticky saturday">14日(土)</th>
+                <th class="header-sticky sunday">15日(日)</th>
+                <th class="header-sticky">16日(月)</th>
+                <th class="header-sticky">17日(火)</th>
+                <th class="header-sticky">18日(水)</th>
+                <th class="header-sticky">19日(木)</th>
+                <th class="header-sticky">20日(金)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="sticky">空き状況</td>
+                <td colspan="20"></td>
+            </tr>
+            <tr>
+                <td class="sticky"><a href="#">菅峯橋架付</a></td>
+                <td colspan="20"></td>
+            </tr>
+            <tr>
+                <td class="sticky"><a href="#">帯工事</a></td>
+                <td colspan="20"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
-        function changeMonth(offset) {
-            currentMonth += offset;
-            if (currentMonth > 12) {
-                currentMonth = 1;
-                currentYear++;
-            } else if (currentMonth < 1) {
-                currentMonth = 12;
-                currentYear--;
-            }
-            document.getElementById('yearMonth').textContent = `${currentYear}年${currentMonth}月`;
-        }
-    </script>
+<script>
+    document.getElementById('prevMonth').addEventListener('click', () => {
+        alert('前月表示（未実装）');
+    });
+
+    document.getElementById('nextMonth').addEventListener('click', () => {
+        alert('翌月表示（未実装）');
+    });
+</script>
 
 </body>
 </html>
