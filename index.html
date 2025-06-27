@@ -5,10 +5,9 @@
     <title>スケジュールアプリ</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            overflow-x: hidden;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
         .navbar {
             display: flex;
@@ -16,9 +15,10 @@
             background-color: #333;
             color: white;
             padding: 10px;
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 5;
+            width: 100%;
+            z-index: 1000;
         }
         .navbar-menu {
             font-size: 24px;
@@ -39,7 +39,7 @@
             box-shadow: 2px 0 5px rgba(0,0,0,0.3);
             transform: translateX(-100%);
             transition: transform 0.3s ease;
-            z-index: 10;
+            z-index: 999;
         }
         .sidebar.active {
             transform: translateX(0);
@@ -51,20 +51,25 @@
             color: black;
         }
         .header {
+            position: fixed;
+            top: 50px;
+            width: 100%;
+            background-color: white;
+            padding: 10px;
+            z-index: 999;
             display: flex;
             align-items: center;
-            padding: 10px;
-            position: sticky;
-            top: 50px;
-            background-color: white;
-            z-index: 4;
+            border-bottom: 1px solid #ccc;
         }
         .header label, .header select, .header button {
             margin-right: 10px;
         }
-        .table-container {
-            overflow: auto;
+        .table-wrapper {
+            position: absolute;
+            top: 100px;
+            bottom: 0;
             width: 100%;
+            overflow: auto;
         }
         table {
             border-collapse: collapse;
@@ -80,17 +85,17 @@
         th.fixed-header {
             background-color: #f0f0f0;
             position: sticky;
-            top: 100px;
-            z-index: 3;
+            top: 0;
+            z-index: 5;
         }
         th:first-child, td:first-child {
-            background-color: #f9f9f9;
             position: sticky;
             left: 0;
-            z-index: 2;
+            background-color: #f9f9f9;
+            z-index: 4;
         }
         th:first-child.fixed-header {
-            z-index: 4;
+            z-index: 6;
             background-color: #f0f0f0;
         }
     </style>
@@ -121,15 +126,14 @@
     <button onclick="changeMonth(1)">翌月</button>
 </div>
 
-<div class="table-container">
+<div class="table-wrapper">
     <table id="scheduleTable">
         <thead>
             <tr id="dateRow">
                 <th class="fixed-header"></th>
             </tr>
         </thead>
-        <tbody id="scheduleBody">
-        </tbody>
+        <tbody id="scheduleBody"></tbody>
     </table>
 </div>
 
@@ -179,7 +183,6 @@
             const cell = document.createElement('td');
             emptyRow.appendChild(cell);
         }
-
         scheduleBody.appendChild(emptyRow);
 
         sites.forEach(site => {
@@ -195,16 +198,13 @@
             for (let day = 1; day <= lastDate; day++) {
                 const cell = document.createElement('td');
                 const cellDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
                 if (cellDate >= site.start && cellDate <= site.end) {
                     cell.style.backgroundColor = 'white';
                 } else {
                     cell.style.backgroundColor = '#ccc';
                 }
-
                 row.appendChild(cell);
             }
-
             scheduleBody.appendChild(row);
         });
     }
