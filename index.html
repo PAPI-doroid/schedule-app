@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>スケジュールアプリ</title>
     <style>
         body {
@@ -9,220 +10,173 @@
             font-family: Arial, sans-serif;
             overflow: hidden;
         }
-        .navbar {
-            display: flex;
-            align-items: center;
+
+        .menu-bar {
             background-color: #333;
             color: white;
             padding: 10px;
-            position: fixed;
+            display: flex;
+            align-items: center;
+            position: sticky;
             top: 0;
-            width: 100%;
             z-index: 1000;
         }
-        .navbar-menu {
+
+        .menu-bar .menu-icon {
             font-size: 24px;
-            cursor: pointer;
-            margin-right: 20px;
+            margin-right: 10px;
         }
-        .navbar-title {
-            font-size: 18px;
-        }
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 250px;
-            height: 100%;
-            background-color: #f0f0f0;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.3);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-            z-index: 999;
-        }
-        .sidebar.active {
-            transform: translateX(0);
-        }
-        .sidebar a {
-            display: block;
-            margin-bottom: 10px;
-            text-decoration: none;
-            color: black;
-        }
-        .header {
-            position: fixed;
-            top: 50px;
-            width: 100%;
-            background-color: white;
+
+        .top-controls {
+            background-color: #f4f4f4;
             padding: 10px;
+            position: sticky;
+            top: 40px;
             z-index: 999;
             display: flex;
             align-items: center;
-            border-bottom: 1px solid #ccc;
+            gap: 10px;
         }
-        .header label, .header select, .header button {
-            margin-right: 10px;
-        }
-        .table-wrapper {
-            position: absolute;
-            top: 100px;
-            bottom: 0;
-            width: 100%;
+
+        .schedule-container {
             overflow: auto;
+            width: 100%;
+            height: calc(100vh - 100px);
         }
+
         table {
             border-collapse: collapse;
-            width: max-content;
-            min-width: 100%;
+            min-width: 1500px;
         }
+
         th, td {
-            border: 1px solid black;
-            padding: 5px;
+            border: 1px solid #000;
+            padding: 8px;
             text-align: center;
+            min-width: 80px;
             white-space: nowrap;
         }
-        th.fixed-header {
-            background-color: #f0f0f0;
-            position: sticky;
-            top: 0;
-            z-index: 5;
-        }
+
         th:first-child, td:first-child {
             position: sticky;
             left: 0;
-            background-color: #f9f9f9;
-            z-index: 4;
-        }
-        th:first-child.fixed-header {
-            z-index: 6;
             background-color: #f0f0f0;
+            z-index: 998;
+        }
+
+        .header th {
+            position: sticky;
+            top: 80px;
+            background-color: #fff;
+            z-index: 997;
+        }
+
+        .header th:first-child {
+            z-index: 999;
+        }
+
+        .day-sunday {
+            color: red;
+        }
+
+        .day-saturday {
+            color: blue;
         }
     </style>
 </head>
 <body>
 
-<div class="navbar">
-    <div class="navbar-menu" onclick="toggleMenu()">≡</div>
-    <div class="navbar-title">スケジュールアプリ</div>
-</div>
+    <div class="menu-bar">
+        <span class="menu-icon">≡</span> スケジュールアプリ
+    </div>
 
-<div class="sidebar" id="sidebar">
-    <a href="#">スケジュール表示</a>
-    <a href="#">現場登録</a>
-    <a href="#">従業員・車両配置登録</a>
-    <a href="#">従業員情報登録</a>
-    <a href="#">車両情報登録</a>
-</div>
+    <div class="top-controls">
+        <label for="location">拠点：</label>
+        <select id="location">
+            <option value="本社">本社</option>
+            <option value="横浜">横浜</option>
+        </select>
+        <button onclick="changeMonth(-1)">前月</button>
+        <span id="yearMonth">2025年6月</span>
+        <button onclick="changeMonth(1)">翌月</button>
+    </div>
 
-<div class="header">
-    <label for="location">拠点：</label>
-    <select id="location">
-        <option value="本社">本社</option>
-        <option value="横浜">横浜</option>
-    </select>
-    <button onclick="changeMonth(-1)">前月</button>
-    <div id="currentMonth" style="margin: 0 10px;"></div>
-    <button onclick="changeMonth(1)">翌月</button>
-</div>
+    <div class="schedule-container" id="scheduleContainer">
+        <table>
+            <thead class="header">
+                <tr>
+                    <th></th>
+                    <th class="day-sunday">1日(日)</th>
+                    <th>2日(月)</th>
+                    <th>3日(火)</th>
+                    <th>4日(水)</th>
+                    <th>5日(木)</th>
+                    <th>6日(金)</th>
+                    <th class="day-saturday">7日(土)</th>
+                    <th class="day-sunday">8日(日)</th>
+                    <th>9日(月)</th>
+                    <th>10日(火)</th>
+                    <th>11日(水)</th>
+                    <th>12日(木)</th>
+                    <th>13日(金)</th>
+                    <th class="day-saturday">14日(土)</th>
+                    <th class="day-sunday">15日(日)</th>
+                    <th>16日(月)</th>
+                    <th>17日(火)</th>
+                    <th>18日(水)</th>
+                    <th>19日(木)</th>
+                    <th>20日(金)</th>
+                    <th class="day-saturday">21日(土)</th>
+                    <th class="day-sunday">22日(日)</th>
+                    <th>23日(月)</th>
+                    <th>24日(火)</th>
+                    <th>25日(水)</th>
+                    <th>26日(木)</th>
+                    <th>27日(金)</th>
+                    <th class="day-saturday">28日(土)</th>
+                    <th class="day-sunday">29日(日)</th>
+                    <th>30日(月)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th>空き状況</th>
+                    <td colspan="30"></td>
+                </tr>
+                <tr>
+                    <th><a href="#">菅峯橋架付</a></th>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td>
+                </tr>
+                <tr>
+                    <th><a href="#">帯工事</a></th>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+                    <td></td><td></td><td></td><td></td><td></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-<div class="table-wrapper">
-    <table id="scheduleTable">
-        <thead>
-            <tr id="dateRow">
-                <th class="fixed-header"></th>
-            </tr>
-        </thead>
-        <tbody id="scheduleBody"></tbody>
-    </table>
-</div>
+    <script>
+        let currentMonth = 6;
+        let currentYear = 2025;
 
-<script>
-    const sidebar = document.getElementById('sidebar');
-
-    function toggleMenu() {
-        sidebar.classList.toggle('active');
-    }
-
-    const scheduleBody = document.getElementById('scheduleBody');
-    const dateRow = document.getElementById('dateRow');
-    const currentMonth = document.getElementById('currentMonth');
-
-    let year = 2025;
-    let month = 6;
-
-    const sites = [
-        { name: "菅峯橋架付", start: "2025-06-01", end: "2025-06-10" },
-        { name: "帯工事", start: "2025-06-05", end: "2025-06-20" }
-    ];
-
-    function renderTable() {
-        dateRow.innerHTML = '<th class="fixed-header"></th>';
-        scheduleBody.innerHTML = '';
-
-        currentMonth.innerText = `${year}年${month}月`;
-
-        const lastDate = new Date(year, month, 0).getDate();
-
-        for (let day = 1; day <= lastDate; day++) {
-            const date = new Date(year, month - 1, day);
-            const dayName = date.toLocaleDateString('ja-JP', { weekday: 'short' });
-            let color = 'black';
-            if (dayName === '日') color = 'red';
-            if (dayName === '土') color = 'blue';
-            dateRow.innerHTML += `<th class="fixed-header" style="color:${color}">${day}日(${dayName})</th>`;
-        }
-
-        const emptyRow = document.createElement('tr');
-        const labelCell = document.createElement('td');
-        labelCell.classList.add('fixed-header');
-        labelCell.textContent = '空き状況';
-        emptyRow.appendChild(labelCell);
-
-        for (let day = 1; day <= lastDate; day++) {
-            const cell = document.createElement('td');
-            emptyRow.appendChild(cell);
-        }
-        scheduleBody.appendChild(emptyRow);
-
-        sites.forEach(site => {
-            const row = document.createElement('tr');
-            const nameCell = document.createElement('td');
-            const siteLink = document.createElement('a');
-            siteLink.href = "#";
-            siteLink.textContent = site.name;
-            siteLink.onclick = () => alert(`工事名: ${site.name}\n工期: ${site.start} ～ ${site.end}`);
-            nameCell.appendChild(siteLink);
-            row.appendChild(nameCell);
-
-            for (let day = 1; day <= lastDate; day++) {
-                const cell = document.createElement('td');
-                const cellDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                if (cellDate >= site.start && cellDate <= site.end) {
-                    cell.style.backgroundColor = 'white';
-                } else {
-                    cell.style.backgroundColor = '#ccc';
-                }
-                row.appendChild(cell);
+        function changeMonth(offset) {
+            currentMonth += offset;
+            if (currentMonth > 12) {
+                currentMonth = 1;
+                currentYear++;
+            } else if (currentMonth < 1) {
+                currentMonth = 12;
+                currentYear--;
             }
-            scheduleBody.appendChild(row);
-        });
-    }
-
-    function changeMonth(offset) {
-        month += offset;
-        if (month === 0) {
-            month = 12;
-            year -= 1;
-        } else if (month === 13) {
-            month = 1;
-            year += 1;
+            document.getElementById('yearMonth').textContent = `${currentYear}年${currentMonth}月`;
         }
-        renderTable();
-    }
-
-    renderTable();
-</script>
+    </script>
 
 </body>
 </html>
