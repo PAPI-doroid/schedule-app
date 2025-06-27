@@ -72,13 +72,17 @@
             background-color: #f0f0f0;
             position: sticky;
             top: 0;
-            z-index: 2;
+            z-index: 3;
         }
         th:first-child, td:first-child {
             background-color: #f9f9f9;
             position: sticky;
             left: 0;
-            z-index: 1;
+            z-index: 2;
+        }
+        th:first-child.fixed-header {
+            z-index: 4;
+            background-color: #f0f0f0;
         }
     </style>
 </head>
@@ -112,11 +116,10 @@
     <table id="scheduleTable">
         <thead>
             <tr id="dateRow">
-                <th class="fixed-header"></th> <!-- 1列1行目は空白 -->
+                <th class="fixed-header"></th>
             </tr>
         </thead>
         <tbody id="scheduleBody">
-            <!-- セルはJavaScriptで描画 -->
         </tbody>
     </table>
 </div>
@@ -157,7 +160,6 @@
             dateRow.innerHTML += `<th class="fixed-header" style="color:${color}">${day}日(${dayName})</th>`;
         }
 
-        // 空き状況行を作成
         const emptyRow = document.createElement('tr');
         const labelCell = document.createElement('td');
         labelCell.classList.add('fixed-header');
@@ -171,7 +173,6 @@
 
         scheduleBody.appendChild(emptyRow);
 
-        // 現場データを描画
         sites.forEach(site => {
             const row = document.createElement('tr');
             const nameCell = document.createElement('td');
